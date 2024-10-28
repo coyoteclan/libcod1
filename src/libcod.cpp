@@ -352,7 +352,7 @@ void custom_Com_Init(char *commandLine)
     fs_callbacks = Cvar_Get("fs_callbacks", "maps/mp/gametypes/_callbacksetup", CVAR_ARCHIVE);
     fs_callbacks_additional = Cvar_Get("fs_callbacks_additional", "", CVAR_ARCHIVE);
     fs_svrPaks = Cvar_Get("fs_svrPaks", "", CVAR_ARCHIVE);
-    g_deadChat = Cvar_Get("g_deadChat", "0", CVAR_ARCHIVE);
+    g_deadChat = Cvar_Get("g_deadChat", "1", CVAR_ARCHIVE);
     g_debugCallbacks = Cvar_Get("g_debugCallbacks", "0", CVAR_ARCHIVE);
     g_playerEject = Cvar_Get("g_playerEject", "1", CVAR_ARCHIVE);
     g_resetSlide = Cvar_Get("g_resetSlide", "0", CVAR_ARCHIVE);

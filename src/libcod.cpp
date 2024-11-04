@@ -2138,12 +2138,12 @@ void custom_SV_SendClientMessages(void)
 
 void custom_SV_SendMessageToClient(msg_t *msg, client_t *client)
 {
-    byte data[MAX_MSGLEN];
+    byte svCompressBuf[MAX_MSGLEN];
     int compressedSize;
     int rateMsec;
     
-    memcpy(data, msg->data, sizeof(data));
-    compressedSize = MSG_WriteBitsCompress(msg->data + 4, data + 4, msg->cursize - 4) + 4;
+    memcpy(svCompressBuf, msg->data, 4);
+    compressedSize = MSG_WriteBitsCompress(msg->data + 4, svCompressBuf + 4, msg->cursize - 4) + 4;
     if (client->dropReason)
     {
         SV_DropClient(client, client->dropReason);
@@ -2151,7 +2151,7 @@ void custom_SV_SendMessageToClient(msg_t *msg, client_t *client)
     client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageSize = compressedSize;
     client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageSent = svs.time;
     client->frames[client->netchan.outgoingSequence & PACKET_MASK].messageAcked = -1;
-    SV_Netchan_Transmit(client, data, compressedSize);
+    SV_Netchan_Transmit(client, svCompressBuf, compressedSize);
 
     if (client->netchan.remoteAddress.type == NA_LOOPBACK || Sys_IsLANAddress(client->netchan.remoteAddress)
         || (sv_fastDownload->integer && client->download))
@@ -2848,7 +2848,7 @@ class libcod
     public:
     libcod()
     {
-        printf("------------- libcod -------------\n");
+        printf("------------ libcod ------------\n");
         printf("Compiled on %s %s using g++ %s\n", __DATE__, __TIME__, __VERSION__);
 
         // Don't inherit lib of parent
@@ -2915,7 +2915,7 @@ class libcod
         hook_SV_BotUserMove->hook();
 
         printf("Loading complete\n");
-        printf("-----------------------------------\n");
+        printf("--------------------------------\n");
     }
 
     ~libcod()

@@ -15,5 +15,5 @@
 // Some declarations to be able to call before defined
 static void ban();
 static void unban();
-std::tuple<bool, int, int, std::string> banInfoForIp(char* ip);
+std::tuple<bool, int, int, std::string> getBanInfoForIp(char* ip);
 void UCMD_custom_sprint(client_t *cl);

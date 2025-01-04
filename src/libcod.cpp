@@ -959,7 +959,7 @@ void hook_SV_DirectConnect(netadr_t from)
     argBackup = oss.str();
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", from.ip[0], from.ip[1], from.ip[2], from.ip[3]);
 
-    auto banInfo = banInfoForIp(ip);
+    auto banInfo = getBanInfoForIp(ip);
     if(std::get<0>(banInfo) == true) // banned
     {
         time_t current_time = time(NULL);
@@ -1248,7 +1248,7 @@ void custom_SV_SendClientGameState(client_t *client)
 
 ////// Custom operator commands
 //// ban & unban
-std::tuple<bool, int, int, std::string> getGanInfoForIp(char* ip)
+std::tuple<bool, int, int, std::string> getBanInfoForIp(char* ip)
 {
     char *file;
     std::string token;
@@ -1547,7 +1547,7 @@ static void ban()
         }
     }
     
-    auto banInfo = banInfoForIp(ip);
+    auto banInfo = getBanInfoForIp(ip);
     if(std::get<0>(banInfo) == true) // banned
     {
         std::ostringstream oss;

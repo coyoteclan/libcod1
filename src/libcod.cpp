@@ -1,7 +1,5 @@
 #include "libcod.hpp"
-
 #include "cracking.hpp"
-#include "shared.hpp"
 
 //// Cvars
 cvar_t *com_cl_running;
@@ -64,7 +62,6 @@ level_locals_t *level;
 pmove_t **pm;
 pml_t *pml;
 stringIndex_t *scr_const;
-
 // Functions
 G_Say_t G_Say;
 G_RegisterCvars_t G_RegisterCvars;
@@ -138,8 +135,7 @@ int codecallback_playerkilled = 0;
 int codecallback_client_spam = 0;
 int codecallback_playercommand = 0;
 int codecallback_playerairjump = 0;
-int codecallback_playercrashland = 0;
-
+//int codecallback_playercrashland = 0;
 callback_t callbacks[] =
 {
     // Stock
@@ -152,11 +148,10 @@ callback_t callbacks[] =
     {&codecallback_client_spam, "CodeCallback_CLSpam", true},
     {&codecallback_playercommand, "CodeCallback_PlayerCommand", true},
     {&codecallback_playerairjump, "CodeCallback_PlayerAirJump", true},
-    {&codecallback_playercrashland, "CodeCallback_PlayerCrashLand", true},
+    //{&codecallback_playercrashland, "CodeCallback_PlayerCrashLand", true},
 };
 ////
 
-void UCMD_custom_sprint(client_t *cl);
 // See https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/sv_client.c#L98
 static ucmd_t ucmds[] =
 {
@@ -197,21 +192,16 @@ cHook *hook_Touch_Item_Auto;
 uintptr_t resume_addr_Jump_Check;
 uintptr_t resume_addr_Jump_Check_2;
 
-// Base time in seconds
-time_t sys_timeBase = 0;
-// Current time in ms, using sys_timeBase as origin
-uint64_t Sys_Milliseconds64(void)
+time_t sys_timeBase = 0; // Base time in seconds
+uint64_t Sys_Milliseconds64(void) // Current time in ms, using sys_timeBase as origin
 {
     struct timeval tp;
-
     gettimeofday(&tp, NULL);
-
     if (!sys_timeBase)
     {
         sys_timeBase = tp.tv_sec;
         return tp.tv_usec / 1000;
     }
-
     return (tp.tv_sec - sys_timeBase) * 1000 + tp.tv_usec / 1000;
 }
 
@@ -230,21 +220,19 @@ char *custom_va(const char *format, ...)
     vsprintf(temp_buffer, format, argptr);
     va_end(argptr);
 
-    if ((len = strlen(temp_buffer)) >= MAX_VA_STRING)
+    if((len = strlen(temp_buffer)) >= MAX_VA_STRING)
         Com_Error(ERR_DROP, "Attempted to overrun string in call to va()\n");
 
-    if (len + index >= MAX_VA_STRING - 1)
+    if(len + index >= MAX_VA_STRING - 1)
         index = 0;
 
     buf = &string[index];
     memcpy(buf, temp_buffer, len + 1);
-
     index += len + 1;
-
     return buf;
 }
 
-void sendMessageTo_inGameAdmin_orServerConsole(client_t *cl, std::string message)
+void sendMessageToClient_orServerConsole(client_t *cl, std::string message)
 {
     std::string finalMessage;
     if (cl)
@@ -288,7 +276,7 @@ qboolean FS_svrPak(const char *base)
         }
 
         free(stringCopy);
-        if (isSvrPak)
+        if(isSvrPak)
             return qtrue;
     }
 
@@ -322,8 +310,9 @@ void custom_Com_Init(char *commandLine)
     *(int*)&Com_Init = hook_Com_Init->from;
     Com_Init(commandLine);
     hook_Com_Init->hook();
-    
-    // Get references to stock cvars
+
+    //// Cvars
+    // Create references
     com_cl_running = Cvar_FindVar("cl_running");
     com_dedicated = Cvar_FindVar("dedicated");
     com_logfile = Cvar_FindVar("logfile");
@@ -351,11 +340,11 @@ void custom_Com_Init(char *commandLine)
     sv_showAverageBPS = Cvar_FindVar("sv_showAverageBPS");
     sv_showCommands = Cvar_FindVar("sv_showCommands");
 
-    // Register custom cvars
+    // Register
     Cvar_Get("libcod", "1", CVAR_SERVERINFO);
     Cvar_Get("sv_wwwBaseURL", "", CVAR_ARCHIVE | CVAR_SYSTEMINFO);
     Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE | CVAR_SYSTEMINFO);
-    
+    // Register and create references
     airjump_heightScale = Cvar_Get("airjump_heightScale", "1.5", CVAR_ARCHIVE);
     fs_callbacks = Cvar_Get("fs_callbacks", "maps/mp/gametypes/_callbacksetup", CVAR_ARCHIVE);
     fs_callbacks_additional = Cvar_Get("fs_callbacks_additional", "", CVAR_ARCHIVE);
@@ -380,6 +369,7 @@ void custom_Com_Init(char *commandLine)
     sv_fastDownload = Cvar_Get("sv_fastDownload", "0", CVAR_ARCHIVE);
     sv_heartbeatDelay = Cvar_Get("sv_heartbeatDelay", "30", CVAR_ARCHIVE);
     sv_spectatorNoclip = Cvar_Get("sv_spectatorNoclip", "0", CVAR_ARCHIVE);
+    ////
 }
 
 // See https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/script.c#L944
@@ -436,7 +426,7 @@ void custom_GScr_LoadGameTypeScript()
             *callbacks[i].pos = Scr_GetFunctionHandle(fs_callbacks->string, callbacks[i].name);
 
         /*if (*callbacks[i].pos && g_debugCallbacks->integer)
-            Com_Printf("%s found @ %p\n", callbacks[i].name, scrVarPub.programBuffer + *callbacks[i].pos);*/ //TODO: verify scrVarPub_t
+            Com_Printf("%s found @ %p\n", callbacks[i].name, scrVarPub.programBuffer + *callbacks[i].pos);*/ // TODO: verify scrVarPub_t
     }
 }
 
@@ -493,7 +483,7 @@ void custom_SV_SpawnServer(char *server)
     hook_SV_SpawnServer->hook();
 
 #if COMPILE_SQLITE == 1
-    free_sqlite_db_stores_and_tasks();
+    free_sqlite_db_stores_and_tasks(); // TODO: In SV_MapRestart_f too, see https://github.com/voron00/CoD2rev_Server/blob/b012c4b45a25f7f80dc3f9044fe9ead6463cb5c6/src/server/sv_ccmds_mp.cpp#L56
 #endif
 }
 
@@ -540,10 +530,8 @@ void custom_SV_PacketEvent(netadr_t from, msg_t *msg)
                     cl->netchan.remoteAddress.port = from.port;
                 }
 
-                if (!Netchan_Process(&cl->netchan, msg))
-                {
+                if(!Netchan_Process(&cl->netchan, msg))
                     return;
-                }
 
                 cl->serverId = MSG_ReadByte(msg);
                 cl->messageAcknowledge = MSG_ReadLong(msg);
@@ -570,10 +558,9 @@ void custom_SV_PacketEvent(netadr_t from, msg_t *msg)
                 
                 SV_Netchan_Decode(cl, msg->data + msg->readcount, msg->cursize - msg->readcount);
 
-                if (cl->state == CS_ZOMBIE)
-                {
+                if(cl->state == CS_ZOMBIE)
                     return;
-                }
+
                 cl->lastPacketTime = svs.time;
                 SV_ExecuteClientMessage(cl, msg);
                 return;
@@ -589,6 +576,7 @@ void custom_SV_PacketEvent(netadr_t from, msg_t *msg)
     }
 }
 
+////
 /*
 Purpose:
 Prevent server from no longer appearing in client list after masterserver spent time unreachable.
@@ -598,6 +586,11 @@ See:
 - https://github.com/id-Software/Enemy-Territory/blob/40342a9e3690cb5b627a433d4d5cbf30e3c57698/src/server/sv_main.c#L244
 - https://github.com/voron00/CoD2rev_Server/blob/b012c4b45a25f7f80dc3f9044fe9ead6463cb5c6/src/libcod/libcod.cpp#L505
 - https://github.com/voron00/CoD2rev_Server/blob/b012c4b45a25f7f80dc3f9044fe9ead6463cb5c6/src/server/sv_main_pc_mp.cpp#L216
+// UNTESTED
+*/
+/*
+TODO: Check if issue wasn't caused by not ignoring SV_AuthorizeIpPacket
+See https://github.com/xtnded/codextended/blob/f7b28c8b8ee4cfb03f8d46d6e1df2efe0380cc1b/src/sv_client.c#L234
 */
 void custom_SV_MasterHeartbeat(const char *hbname)
 {
@@ -642,35 +635,30 @@ void custom_SV_MasterHeartbeat(const char *hbname)
         }
     }
 }
+////
 
-// ioquake3 rate limit connectionless requests
-// https://github.com/ioquake/ioq3/blob/master/code/server/sv_main.c
-
+//// ioquake3 rate limit connectionless requests
+// See https://github.com/ioquake/ioq3/blob/master/code/server/sv_main.c
 // This is deliberately quite large to make it more of an effort to DoS
 #define MAX_BUCKETS	16384
 #define MAX_HASHES 1024
-
 static leakyBucket_t buckets[MAX_BUCKETS];
 static leakyBucket_t* bucketHashes[MAX_HASHES];
 leakyBucket_t outboundLeakyBucket;
-
 static long SVC_HashForAddress(netadr_t address)
 {
     unsigned char *ip = address.ip;
     int	i;
     long hash = 0;
 
-    for (i = 0; i < 4; i++)
-    {
+    for(i = 0; i < 4; i++)
         hash += (long)(ip[i]) * (i + 119);
-    }
 
     hash = (hash ^ (hash >> 10) ^ (hash >> 20));
     hash &= (MAX_HASHES - 1);
 
     return hash;
 }
-
 static leakyBucket_t * SVC_BucketForAddress(netadr_t address, int burst, int period)
 {
     leakyBucket_t *bucket = NULL;
@@ -678,11 +666,9 @@ static leakyBucket_t * SVC_BucketForAddress(netadr_t address, int burst, int per
     long hash = SVC_HashForAddress(address);
     uint64_t now = Sys_Milliseconds64();
 
-    for (bucket = bucketHashes[hash]; bucket; bucket = bucket->next)
-    {
-        if (memcmp(bucket->adr, address.ip, 4) == 0)
+    for(bucket = bucketHashes[hash]; bucket; bucket = bucket->next)
+        if(memcmp(bucket->adr, address.ip, 4) == 0)
             return bucket;
-    }
 
     for (i = 0; i < MAX_BUCKETS; i++)
     {
@@ -695,12 +681,12 @@ static leakyBucket_t * SVC_BucketForAddress(netadr_t address, int burst, int per
         if (bucket->lastTime > 0 && (interval > (burst * period) ||
                                        interval < 0))
         {
-            if (bucket->prev != NULL)
+            if(bucket->prev != NULL)
                 bucket->prev->next = bucket->next;
             else
                 bucketHashes[bucket->hash] = bucket->next;
 
-            if (bucket->next != NULL)
+            if(bucket->next != NULL)
                 bucket->next->prev = bucket->prev;
 
             memset(bucket, 0, sizeof(leakyBucket_t));
@@ -717,7 +703,7 @@ static leakyBucket_t * SVC_BucketForAddress(netadr_t address, int burst, int per
 
             // Add to the head of the relevant hash chain
             bucket->next = bucketHashes[hash];
-            if (bucketHashes[hash] != NULL)
+            if(bucketHashes[hash] != NULL)
                 bucketHashes[hash]->prev = bucket;
 
             bucket->prev = NULL;
@@ -730,7 +716,6 @@ static leakyBucket_t * SVC_BucketForAddress(netadr_t address, int burst, int per
     // Couldn't allocate a bucket for this address
     return NULL;
 }
-
 bool SVC_RateLimit(leakyBucket_t *bucket, int burst, int period)
 {
     if (bucket != NULL)
@@ -759,12 +744,12 @@ bool SVC_RateLimit(leakyBucket_t *bucket, int burst, int period)
     }
     return true;
 }
-
 bool SVC_RateLimitAddress(netadr_t from, int burst, int period)
 {
     leakyBucket_t *bucket = SVC_BucketForAddress(from, burst, period);
     return SVC_RateLimit(bucket, burst, period);
 }
+////
 
 bool SVC_callback(const char *str, const char *ip)
 {
@@ -805,7 +790,6 @@ bool SVC_ApplyRconLimit(netadr_t from, qboolean badRconPassword)
     
     return false;
 }
-
 bool SVC_ApplyStatusLimit(netadr_t from)
 {
     // Prevent using getstatus as an amplifier
@@ -1213,11 +1197,11 @@ void custom_SV_SendClientGameState(client_t *client)
                 {
                     if (sv_downloadForce->integer)
                     {
-                        stringCopy.append("\\cl_allowDownload\\1");
                         /*
                         To prevent servers forcing download on yourself, you can use the c1cx client extension
                         See function CL_SystemInfoChanged_Cvar_Set in https://github.com/cod1dev/c1cx
                         */
+                        stringCopy.append("\\cl_allowDownload\\1");
                     }
                     else
                     {
@@ -1225,7 +1209,7 @@ void custom_SV_SendClientGameState(client_t *client)
                         1.1x client extension requires download forcing, even if player enables cl_allowDownload by himself before joining.
                         See: https://github.com/xtnded/codextended-client/blob/45af251518a390ab08b1c8713a6a1544b70114a1/cl_main.cpp#L41
                         */
-                        if(*Info_ValueForKey(client->userinfo, "xtndedbuild") && sv_allowDownload->integer)
+                        if(*Info_ValueForKey(client->userinfo, "xtndedbuild"))
                             stringCopy.append("\\cl_allowDownload\\1");
                     }
                 }
@@ -1262,8 +1246,9 @@ void custom_SV_SendClientGameState(client_t *client)
     SV_SendMessageToClient(&msg, client);
 }
 
-//// Custom ban
-std::tuple<bool, int, int, std::string> banInfoForIp(char* ip)
+////// Custom operator commands
+//// ban & unban
+std::tuple<bool, int, int, std::string> getGanInfoForIp(char* ip)
 {
     char *file;
     std::string token;
@@ -1297,8 +1282,6 @@ std::tuple<bool, int, int, std::string> banInfoForIp(char* ip)
     return banInfo;
 }
 
-const std::array<std::string, 5> banParameters = {"-i", "-n", "-r", "-d", "-a"};
-const std::array<std::string, 2> unbanParameters = {"-i", "-a"};
 /*
 -i: ip
 -n: banned client number
@@ -1306,9 +1289,11 @@ const std::array<std::string, 2> unbanParameters = {"-i", "-a"};
 -d: duration
 -a: admin client number
 */
+const std::array<std::string, 5> banParameters = {"-i", "-n", "-r", "-d", "-a"};
+const std::array<std::string, 2> unbanParameters = {"-i", "-a"};
 
 template <std::size_t N>
-bool isValidParameter(std::string toCheck, std::array<std::string, N> parameters)
+bool isValidBanParameter(std::string toCheck, std::array<std::string, N> parameters)
 {
     for (const std::string&parameter : parameters)
     {
@@ -1317,6 +1302,7 @@ bool isValidParameter(std::string toCheck, std::array<std::string, N> parameters
     }
     return false;
 }
+
 static void ban()
 {
     if (!com_sv_running->integer)
@@ -1360,7 +1346,7 @@ static void ban()
     for (std::size_t i = 0; i < argvList.size(); i++)
     {
         std::string argv = argvList[i];
-        if (isValidParameter(argv, banParameters)) // Found an option
+        if (isValidBanParameter(argv, banParameters)) // Found an option
         {
             if (parsedParameters.find(argv) == parsedParameters.end())
             {
@@ -1369,7 +1355,7 @@ static void ban()
                 for (std::size_t j = i+1; j < argvList.size(); j++)
                 {
                     std::string argv_next = argvList[j];
-                    if (!isValidParameter(argv_next, banParameters))
+                    if (!isValidBanParameter(argv_next, banParameters))
                     {
                         if(j != i+1)
                             value.append(" ");
@@ -1400,14 +1386,14 @@ static void ban()
             else
             {
                 infoMessage = "Duplicated option " + argv;
-                sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+                sendMessageToClient_orServerConsole(clAdmin, infoMessage);
                 return;
             }
         }
-        else if (argv[0] == '-' && !isValidParameter(argv, banParameters))
+        else if (argv[0] == '-' && !isValidBanParameter(argv, banParameters))
         {
             infoMessage = "Unrecognized option " + argv;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
     }
@@ -1421,7 +1407,7 @@ static void ban()
         if(parsedParameters.find("-i") != parsedParameters.end())
         {
             infoMessage = "Don't use both an IP and a client number";
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
         useClientnum = true;
@@ -1435,7 +1421,7 @@ static void ban()
         if(!inet_pton(AF_INET, ipParam->second.c_str(), &(sa.sin_addr)))
         {
             infoMessage = "Invalid IP address " + ipParam->second;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
         useIp = true;
@@ -1445,7 +1431,7 @@ static void ban()
     if(!useClientnum && !useIp)
     {
         infoMessage = "Use an IP or a client number";
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
         return;
     }
 
@@ -1457,7 +1443,7 @@ static void ban()
         if (durationParam_lastChar != 'h' && durationParam_lastChar != 'd')
         {
             infoMessage = "Invalid duration parameter " + durationParam->second;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
         else
@@ -1466,7 +1452,7 @@ static void ban()
             if (durationParam->second.empty())
             {
                 infoMessage = "Invalid duration parameter " + durationParam->second;
-                sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+                sendMessageToClient_orServerConsole(clAdmin, infoMessage);
                 return;
             }
             else
@@ -1476,7 +1462,7 @@ static void ban()
                     if (durationParam->second[i] < '0' || durationParam->second[i] > '9')
                     {
                         infoMessage = "Invalid duration parameter " + durationParam->second;
-                        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+                        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
                         return;
                     }
                 }
@@ -1534,7 +1520,7 @@ static void ban()
         if(!clToBan)
         {
             infoMessage = "Couldn't find player by num " + parsedParameters.find("-n")->second;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
         else
@@ -1567,7 +1553,7 @@ static void ban()
         std::ostringstream oss;
         oss << "This IP (" << ip << ") is already banned";
         infoMessage = oss.str();
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
         return;
     }
     
@@ -1578,7 +1564,7 @@ static void ban()
     if (FS_FOpenFileByMode("ban.txt", &file, FS_APPEND) < 0)
     {
         infoMessage = "Couldn't open ban.txt";
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
         return;
     }
     else
@@ -1595,7 +1581,6 @@ static void ban()
         clToBan->lastPacketTime = svs.time;
     }
 }
-
 static void unban()
 {
     if (!com_sv_running->integer)
@@ -1634,7 +1619,7 @@ static void unban()
     for (std::size_t i = 0; i < argvList.size(); i++)
     {
         std::string argv = argvList[i];
-        if (isValidParameter(argv, unbanParameters)) // Found an option
+        if (isValidBanParameter(argv, unbanParameters)) // Found an option
         {
             if (parsedParameters.find(argv) == parsedParameters.end())
             {
@@ -1643,7 +1628,7 @@ static void unban()
                 for (std::size_t j = i+1; j < argvList.size(); j++)
                 {
                     std::string argv_next = argvList[j];
-                    if (!isValidParameter(argv_next, unbanParameters))
+                    if (!isValidBanParameter(argv_next, unbanParameters))
                     {
                         if(j != i+1)
                             value.append(" ");
@@ -1674,14 +1659,14 @@ static void unban()
             else
             {
                 infoMessage = "Duplicated option " + argv;
-                sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+                sendMessageToClient_orServerConsole(clAdmin, infoMessage);
                 return;
             }
         }
-        else if (argv[0] == '-' && !isValidParameter(argv, unbanParameters))
+        else if (argv[0] == '-' && !isValidBanParameter(argv, unbanParameters))
         {
             infoMessage = "Unrecognized option " + argv;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
     }
@@ -1696,7 +1681,7 @@ static void unban()
         if(!inet_pton(AF_INET, ipParam->second.c_str(), &(sa.sin_addr)))
         {
             infoMessage = "Invalid IP address " + ipParam->second;
-            sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+            sendMessageToClient_orServerConsole(clAdmin, infoMessage);
             return;
         }
         ip = ipParam->second;
@@ -1704,7 +1689,7 @@ static void unban()
     else
     {
         infoMessage = "Specify an IP address";
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
         return;
     }
     ////
@@ -1714,7 +1699,7 @@ static void unban()
     if (fileSize < 0)
     {
         infoMessage = "Couldn't read ban.txt";
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
         return;        
     }
     
@@ -1746,17 +1731,18 @@ static void unban()
     if (found)
     {
         infoMessage = "Unbanned IP " + ip;
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
     }
     else
     {
         std::ostringstream oss;
         oss << "IP " << ip << " not found";
         infoMessage = oss.str();
-        sendMessageTo_inGameAdmin_orServerConsole(clAdmin, infoMessage);
+        sendMessageToClient_orServerConsole(clAdmin, infoMessage);
     }
 }
 ////
+//////
 
 int custom_MSG_ReadBitsCompress(const byte* input, byte* outputBuf, int readsize, int outputBufSize)
 {
@@ -1800,7 +1786,7 @@ void custom_SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
     
     /*
     Check "nextdl" to prevent client getting stuck downloading after a map_restart occurred.
-    See https://github.com/id-Software/Quake-III-Arena/blob/dbe4ddb10315479fc00086f08e25d968b4b43c49/code/server/sv_client.c#L1485
+    See https://github.com/id-Software/RTCW-MP/blob/937b209a3c14857bea09a692545c59ac1a241275/src/server/sv_client.c#L1578
     */
     if ((cl->serverId == sv_serverId_value || cl->downloadName[0])
         || (!cl->downloadName[0] && strstr(cl->lastClientCommandString, "nextdl")))
@@ -2006,7 +1992,7 @@ void custom_SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 
     if (cl->downloadXmitBlock == cl->downloadCurrentBlock)
     {
-        // See https://github.com/id-Software/Quake-III-Arena/blob/dbe4ddb10315479fc00086f08e25d968b4b43c49/code/server/sv_client.c#L889
+        // FIXME: See https://github.com/id-Software/RTCW-MP/blob/937b209a3c14857bea09a692545c59ac1a241275/src/server/sv_client.c#L962
         if(svs.time - cl->downloadSendTime > 1000)
             cl->downloadXmitBlock = cl->downloadClientBlock;
         else
@@ -2036,6 +2022,7 @@ void custom_SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 }
 
 // See https://github.com/voron00/CoD2rev_Server/blob/b012c4b45a25f7f80dc3f9044fe9ead6463cb5c6/src/server/sv_snapshot_mp.cpp#L686
+// TODO: Figure out why receiving client_t* was causing issue.
 static int SV_RateMsec(client_t client, int messageSize)
 {
     int rate;
@@ -2252,6 +2239,7 @@ void hook_ClientCommand(int clientNum)
 
 //// 1.1 deadchat support
 // See https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/sv_client.c#L940
+// TODO: Like stock support from above versions.
 void hook_G_Say(gentity_s *ent, gentity_s *target, int mode, const char *chatText)
 {
     int unknown_var = *(int*)((int)ent->client + 8400);
@@ -2931,18 +2919,18 @@ void *custom_Sys_LoadDll(const char *name, char *fqpath, int (**entryPoint)(int,
     }
     fclose(fp);
     ////
-    
-    //// Objects
+
+    // VM cvars
+    bg_fallDamageMinHeight = (vmCvar_t*)dlsym(libHandle, "bg_fallDamageMinHeight");
+    bg_fallDamageMaxHeight = (vmCvar_t*)dlsym(libHandle, "bg_fallDamageMaxHeight");
+
+    // Objects
     g_clients = (gclient_t*)dlsym(libHandle, "g_clients");
     g_entities = (gentity_t*)dlsym(libHandle, "g_entities");
     level = (level_locals_t*)dlsym(libHandle, "level");
     pm = (pmove_t**)dlsym(libHandle, "pm");
     pml = (pml_t*)dlsym(libHandle, "pml");
     scr_const = (stringIndex_t*)dlsym(libHandle, "scr_const");
-    // VM cvars
-    bg_fallDamageMinHeight = (vmCvar_t*)dlsym(libHandle, "bg_fallDamageMinHeight");
-    bg_fallDamageMaxHeight = (vmCvar_t*)dlsym(libHandle, "bg_fallDamageMaxHeight");
-    ////
 
     //// Functions
     Scr_GetFunctionHandle = (Scr_GetFunctionHandle_t)dlsym(libHandle, "Scr_GetFunctionHandle");
@@ -3026,7 +3014,7 @@ void *custom_Sys_LoadDll(const char *name, char *fqpath, int (**entryPoint)(int,
     hook_call((int)dlsym(libHandle, "G_Say") + 0x791, (int)hook_G_Say);
     ////
 
-    // For sprint
+    // Sprint updating
     hook_PmoveSingle = new cHook((int)dlsym(libHandle, "PmoveSingle"), (int)custom_PmoveSingle);
     hook_PmoveSingle->hook();
 
@@ -3040,6 +3028,7 @@ void *custom_Sys_LoadDll(const char *name, char *fqpath, int (**entryPoint)(int,
 #if 0
     hook_jmp((int)dlsym(libHandle, "_init") + 0x88C4, (int)custom_PM_CrashLand);
 #endif
+    // TODO: Fix
     /*//// Air jumping
     hook_PM_AirMove = new cHook((int)dlsym(libHandle, "_init") + 0x7B98, (int)custom_PM_AirMove);
     hook_PM_AirMove->hook();

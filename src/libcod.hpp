@@ -1,8 +1,8 @@
-#include <map>      // make_tuple, get, array
-#include <sstream>  // ostringstream
+#include <map>          // make_tuple, get, array
+#include <sstream>      // ostringstream
 #include <vector>
 #include <array>
-#include <cmath>    // fabs, sqrt
+#include <cmath>        // fabs, sqrt
 
 #include <signal.h>
 #include <arpa/inet.h>  // sockaddr_in, inet_pton
@@ -10,7 +10,10 @@
 #include <dlfcn.h>      // dlsym
 #include <sys/time.h>   // gettimeofday
 
-// Using the below declarations to be able to call these functions before they are defined in the .cpp
+#include "shared.hpp"
+
+// Some declarations to be able to call before defined
 static void ban();
 static void unban();
 std::tuple<bool, int, int, std::string> banInfoForIp(char* ip);
+void UCMD_custom_sprint(client_t *cl);

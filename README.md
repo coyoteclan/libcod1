@@ -10,6 +10,6 @@ ___
 - [Reverse Engineering Discord](https://discord.gg/rtfm)
 - [CoDExtended](https://github.com/xtnded/codextended)
 - [CoD2rev_Server](https://github.com/voron00/CoD2rev_Server) and [voron's libcod fork](https://github.com/voron00/libcod)
-- [Quake-III-Arena](https://github.com/id-Software/Quake-III-Arena)
+- [RTCW-MP](https://github.com/id-Software/RTCW-MP)
 - [Ghidra](https://en.wikipedia.org/wiki/Ghidra) and [IDA Free](https://hex-rays.com/ida-free/)
 - [ChatGPT](https://chat.openai.com/)

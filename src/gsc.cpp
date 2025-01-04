@@ -112,8 +112,8 @@ scr_method_t scriptMethods[] =
     {"getIP", gsc_player_getip, 0},
     {"getPing", gsc_player_getping, 0},
     {"getFPS", gsc_player_getfps, 0},
-    {"getUserinfo", gsc_player_getuserinfo, 0},
-    {"setUserinfo", gsc_player_setuserinfo, 0},
+    {"getUserinfoKey", gsc_player_getuserinfokey, 0},
+    {"setUserinfoKey", gsc_player_setuserinfokey, 0},
     {"processClientCommand", gsc_player_processclientcommand, 0},
     {"connectionlessPacketToClient", gsc_player_connectionlesspackettoclient, 0},
     {"dropClient", gsc_player_dropclient, 0},
@@ -290,7 +290,7 @@ int stackGetParams(const char *params, ...)
 
 int stackGetParamInt(int param, int *value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
@@ -302,7 +302,7 @@ int stackGetParamInt(int param, int *value)
         return 1;
     }
 
-    if (var->type != STACK_INT)
+    if(var->type != STACK_INT)
         return 0;
 
     *value = var->u.intValue;
@@ -313,15 +313,14 @@ int stackGetParamInt(int param, int *value)
 int stackGetParamFunction(int param, int *value)
 {
     printf("####### stackGetParamFunction\n");
-    
 
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_FUNCTION)
+    if(var->type != STACK_FUNCTION)
         return 0;
 
     *value = var->u.codePosValue - scrVarPub.programBuffer;
@@ -331,13 +330,13 @@ int stackGetParamFunction(int param, int *value)
 
 int stackGetParamString(int param, char **value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_STRING)
+    if(var->type != STACK_STRING)
         return 0;
 
     *value = SL_ConvertToString(var->u.stringValue);
@@ -347,13 +346,13 @@ int stackGetParamString(int param, char **value)
 
 int stackGetParamConstString(int param, unsigned int *value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_STRING)
+    if(var->type != STACK_STRING)
         return 0;
 
     *value = var->u.stringValue;
@@ -363,13 +362,13 @@ int stackGetParamConstString(int param, unsigned int *value)
 
 int stackGetParamLocalizedString(int param, char **value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_LOCALIZED_STRING)
+    if(var->type != STACK_LOCALIZED_STRING)
         return 0;
 
     *value = SL_ConvertToString(var->u.stringValue);
@@ -379,13 +378,13 @@ int stackGetParamLocalizedString(int param, char **value)
 
 int stackGetParamVector(int param, vec3_t value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_VECTOR)
+    if(var->type != STACK_VECTOR)
         return 0;
 
     VectorCopy(var->u.vectorValue, value);
@@ -395,7 +394,7 @@ int stackGetParamVector(int param, vec3_t value)
 
 int stackGetParamFloat(int param, float *value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
@@ -407,7 +406,7 @@ int stackGetParamFloat(int param, float *value)
         return 1;
     }
 
-    if (var->type != STACK_FLOAT)
+    if(var->type != STACK_FLOAT)
         return 0;
 
     *value = var->u.floatValue;
@@ -417,13 +416,13 @@ int stackGetParamFloat(int param, float *value)
 
 int stackGetParamObject(int param, unsigned int *value)
 {
-    if (param >= Scr_GetNumParam())
+    if(param >= Scr_GetNumParam())
         return 0;
 
     VariableValue *var;
     var = &scrVmPub.top[-param];
 
-    if (var->type != STACK_OBJECT)
+    if(var->type != STACK_OBJECT)
         return 0;
 
     *value = var->u.pointerValue;

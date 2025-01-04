@@ -59,6 +59,7 @@ xmethod_t Scr_GetCustomMethod(const char **fname, qboolean *fdev);
 
 int Q_vsnprintf(char *s0, size_t size, const char *fmt, va_list args);
 
+const char * stackGetParamTypeAsString(int param);
 int stackGetParams(const char *params, ...);
 void stackError(const char *format, ...);
 

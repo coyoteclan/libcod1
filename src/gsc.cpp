@@ -1,5 +1,46 @@
 #include "shared.hpp"
 
+const char * getParamTypeAsString(int type)
+{
+    switch (type)
+    {
+        case 0: return "undefined";
+        case 1: return "string";
+        case 2: return "localized string";
+        case 3: return "vector";
+        case 4: return "float";
+        case 5: return "int";
+        case 6: return "codepos";
+        case 7: return "object";
+        case 8: return "key/value";
+        case 9: return "function";
+        case 10: return "stack";
+        case 11: return "animation";
+        case 12: return "thread";
+        case 13: return "entity";
+        case 14: return "struct";
+        case 15: return "array";
+        case 16: return "dead thread";
+        case 17: return "dead entity";
+        case 18: return "dead object";
+        default: return "unknown type";
+    }
+}
+
+const char * stackGetParamTypeAsString(int param)
+{
+    if(param >= Scr_GetNumParam())
+        return "undefined";
+
+    VariableValue *var;
+    var = &scrVmPub.top[-param];
+
+    if(var->type == 7) // Pointer to object
+        return getParamTypeAsString(Scr_GetPointerType(param));
+    else
+        return getParamTypeAsString(var->type);
+}
+
 scr_function_t scriptFunctions[] =
 {
 #if ENABLE_UNSAFE == 1
@@ -37,6 +78,7 @@ scr_function_t scriptFunctions[] =
     {"strip", gsc_utils_strip, 0},
     {"strstr", gsc_utils_strstr, 0},
     {"monotone", gsc_utils_monotone, 0},
+    {"getType", gsc_utils_gettype, 0},
 
     // Weapons
     {"setWeaponCookable", gsc_weapons_setweaponcookable, 0},

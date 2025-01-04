@@ -369,6 +369,9 @@ extern Scr_GetConstString_t Scr_GetConstString;
 
 typedef void (*Scr_ParamError_t)(int paramNum, const char *error);
 extern Scr_ParamError_t Scr_ParamError;
+
+typedef int (*Scr_GetPointerType_t)(unsigned int param);
+extern Scr_GetPointerType_t Scr_GetPointerType;
 ////
 
 //// SV

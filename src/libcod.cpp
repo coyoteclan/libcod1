@@ -124,6 +124,7 @@ G_LocalizedStringIndex_t G_LocalizedStringIndex;
 trap_SetConfigstring_t trap_SetConfigstring;
 trap_GetArchivedPlayerState_t trap_GetArchivedPlayerState;
 G_Error_t G_Error;
+Scr_GetPointerType_t Scr_GetPointerType;
 ////
 
 //// Callbacks
@@ -2994,6 +2995,7 @@ void *custom_Sys_LoadDll(const char *name, char *fqpath, int (**entryPoint)(int,
     trap_SetConfigstring = (trap_SetConfigstring_t)dlsym(libHandle, "trap_SetConfigstring");
     trap_GetArchivedPlayerState = (trap_GetArchivedPlayerState_t)dlsym(libHandle, "trap_GetArchivedPlayerState");
     G_Error = (G_Error_t)dlsym(libHandle, "G_Error");
+    Scr_GetPointerType = (Scr_GetPointerType_t)dlsym(libHandle, "Scr_GetPointerType");
     ////
 
     //// [exploit patch] codmsgboom

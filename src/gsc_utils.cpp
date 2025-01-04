@@ -639,6 +639,18 @@ void gsc_utils_monotone()
     stackPushString(buffer);
 }
 
+void gsc_utils_gettype()
+{
+    if (Scr_GetNumParam() == 0)
+    {
+        stackError("gsc_utils_gettype() argument is undefined or has a wrong type");
+        stackPushUndefined();
+        return;
+    }
+
+    stackPushString(stackGetParamTypeAsString(0));
+}
+
 #if COMPILE_SSL == 1
 void gsc_utils_hash()
 {

@@ -178,6 +178,11 @@ typedef void (*Huff_offsetReceive_t)(node_t *node, int *ch, byte *fin, int *offs
 static const Huff_offsetReceive_t Huff_offsetReceive = (Huff_offsetReceive_t)0x080724fc;
 ////
 
+//// I
+typedef int (*I_strncmp_t)(const char *s1, const char *s2, int n);
+static const I_strncmp_t I_strncmp = (I_strncmp_t)0x0808315c;
+////
+
 //// Info
 typedef void (*Info_SetValueForKey_t)(char *s, const char *key, const char *value);
 static const Info_SetValueForKey_t Info_SetValueForKey = (Info_SetValueForKey_t)0x080827d4;
@@ -243,6 +248,9 @@ static const MSG_WriteDeltaField_t MSG_WriteDeltaField = (MSG_WriteDeltaField_t)
 
 typedef void (*MSG_WriteDeltaHudElems_t)(msg_t *msg, hudelem_t *from, hudelem_t *to, int count);
 static const MSG_WriteDeltaHudElems_t MSG_WriteDeltaHudElems = (MSG_WriteDeltaHudElems_t)0x0807cd78;
+
+typedef char * (*MSG_ReadCommandString_t)(msg_t *msg);
+static const MSG_ReadCommandString_t MSG_ReadCommandString = (MSG_ReadCommandString_t)0x0807f320;
 ////
 
 //// NET
@@ -282,9 +290,6 @@ typedef void (*Q_strcat_t)(char *dest, int size, const char *src);
 typedef void (*Q_strncpyz_t)(char *dest, const char *src, int destsize);
 
 typedef void (*Q_CleanStr_t)(char *string);
-
-typedef int (*Q_strncmp_t)(const char *s1, const char *s2, int n);
-static const Q_strncmp_t Q_strncmp = (Q_strncmp_t)0x0808315c;
 
 typedef int (*Q_stricmp_t)(const char *s1, const char *s2);
 static const Q_stricmp_t Q_stricmp = (Q_stricmp_t)0x080830e8;

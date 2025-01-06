@@ -137,6 +137,7 @@ int codecallback_client_spam = 0;
 int codecallback_playercommand = 0;
 int codecallback_playerairjump = 0;
 //int codecallback_playercrashland = 0;
+int codecallback_error = 0;
 callback_t callbacks[] =
 {
     // Stock
@@ -150,6 +151,7 @@ callback_t callbacks[] =
     {&codecallback_playercommand, "CodeCallback_PlayerCommand", true},
     {&codecallback_playerairjump, "CodeCallback_PlayerAirJump", true},
     //{&codecallback_playercrashland, "CodeCallback_PlayerCrashLand", true},
+    {&codecallback_error, "CodeCallback_Error", true},
 };
 ////
 
@@ -575,6 +577,12 @@ void custom_SV_PacketEvent(netadr_t from, msg_t *msg)
     {
         SV_ConnectionlessPacket(from, msg);
     }
+}
+
+int custom_SV_CanReplaceServerCommand(client_t *client, const char *command)
+{
+    //// [exploit patch] UNTESTED
+    return -1;
 }
 
 ////
@@ -1245,6 +1253,49 @@ void custom_SV_SendClientGameState(client_t *client)
     Com_DPrintf("Sending %i bytes in gamestate to client: %i\n", msg.cursize, clientNum);
 
     SV_SendMessageToClient(&msg, client);
+}
+
+scr_error_t scr_errors[MAX_ERROR_BUFFER];
+int scr_errors_index = 0;
+void Scr_CodeCallback_Error(qboolean terminal, qboolean emit, const char *internal_function, char *message)
+{
+    if (codecallback_error && Scr_IsSystemActive() && !com_errorEntered)
+    {
+        if (!strncmp(message, "exceeded maximum number of script variables", 43))
+        {
+            /* Since we cannot allocate more script variables, further
+             execution of scripts or script callbacks could lead to an
+             undefined state (in script) or endless error loops, so we stop */
+            Com_Error(ERR_DROP, "\x15%s", "exceeded maximum number of script variables");
+        }
+
+        if (terminal || emit)
+        {
+            stackPushString(message);
+            stackPushString(internal_function);
+            stackPushInt(terminal);
+            short ret = Scr_ExecThread(codecallback_error, 3);
+            Scr_FreeThread(ret);
+        }
+        else
+        {
+            /* If the error is non-critical (not stopping the server), save it
+             so we can emit it later at G_RunFrame which is a rather safe
+             spot compared to if we emit it directly here within the
+             internals of the scripting engine where we risk crashing it
+             with a segmentation fault */
+            if (scr_errors_index < MAX_ERROR_BUFFER)
+            {
+                strncpy(scr_errors[scr_errors_index].internal_function, internal_function, sizeof(scr_errors[scr_errors_index].internal_function));
+                strncpy(scr_errors[scr_errors_index].message, message, sizeof(scr_errors[scr_errors_index].message));
+                scr_errors_index++;
+            }
+            else
+            {
+                printf("Warning: Errors buffer full, not calling CodeCallback_Error for '%s'\n", message);
+            }
+        }
+    }
 }
 
 ////// Custom operator commands
@@ -2190,6 +2241,54 @@ void custom_SV_SendMessageToClient(msg_t *msg, client_t *client)
     sv.bpsTotalBytes += compressedSize;
 }
 
+/*
+qboolean custom_SV_ClientCommand(client_t *cl, msg_t *msg)
+{
+    int seq;
+    char *s;
+    qboolean clientOk;
+    qboolean floodprotect;
+
+    clientOk = 1;
+    floodprotect = true;
+    seq = MSG_ReadLong(msg);
+    s = MSG_ReadCommandString(msg);
+
+    if (seq <= cl->lastClientCommand)
+    {
+        return qtrue;
+    }
+    if (sv_showCommands->integer)
+    {
+        Com_Printf("clientCommand: %i : %s\n", seq, s);
+    }
+
+    if (seq <= cl->lastClientCommand + 1)
+    {
+        if (!I_strncmp("team ", s, 5) || !I_strncmp("score ", s, 6) || !I_strncmp("mr ", s, 3) || !I_strncmp("userinfo ", s, 9))
+        {
+            floodprotect = false;
+        }
+        if (CS_PRIMED < cl->state && sv_floodProtect->integer && svs.time < cl->nextReliableTime && floodprotect)
+        {
+            clientOk = 0;
+            Com_DPrintf("client text ignored for %s: %s\n", cl->name, Cmd_Argv(0));
+        }
+        if (floodprotect)
+        {
+            cl->nextReliableTime = svs.time + 800;
+        }
+        SV_ExecuteClientCommand(cl, s, clientOk);
+        cl->lastClientCommand = seq;
+        Com_sprintf(cl->lastClientCommandString, MAX_STRINGLENGTH, "%s", s);
+        return qtrue;
+    }
+    Com_Printf("Client %s lost %i clientCommands\n", cl->name, (seq - cl->lastClientCommand) + 1);
+    SV_DropClient(cl, "EXE_LOSTRELIABLECOMMANDS");
+    return qfalse;
+}
+*/
+
 void hook_ClientCommand(int clientNum)
 {
     if(!Scr_IsSystemActive())
@@ -2404,7 +2503,7 @@ void hook_PM_ClipVelocity_bounce(const float *in, const float *normal, float *ou
 #if 0
 int PM_GroundSurfaceType(pml_t *pml)
 {
-    if ( (pml->groundTrace.surfaceFlags & 0x20) != 0 )
+    if ((pml->groundTrace.surfaceFlags & 0x20) != 0)
         return 0;
     else
         return (pml->groundTrace.surfaceFlags & 0x1F00000) >> 20;
@@ -2415,7 +2514,7 @@ int PM_DamageLandingForSurface(pml_t *pml)
 }
 int PM_ClampFallDamageMax(int x, int y, int z)
 {
-    if ( x < 0 )
+    if (x < 0)
         return z;
     return y;
 }
@@ -2515,7 +2614,7 @@ void custom_PM_CrashLand()
             v25 = v24 < -0.001;
             v26 = 0;
             v27 = v24 == -0.001;
-            if ( (HIBYTE(v23) & 0x45) == 1 || v24 > 0.001 )
+            if ((HIBYTE(v23) & 0x45) == 1 || v24 > 0.001)
             {
                 *(_DWORD *)(*(_DWORD *)pm + 16) = 200;
                 *(_BYTE *)(*(_DWORD *)v22 + 13) |= 0x20u;
@@ -2572,11 +2671,11 @@ void custom_PM_CrashLand()
                     dmg = (pml->groundTrace.surfaceFlags & 0x1F00000) >> 20;
                 BG_AddPredictableEventToPlayerstate(dmg, damage, (*pm));
             }
-            else if ( fallHeight > 4.0 )
+            else if (fallHeight > 4.0)
             {
-                if ( fallHeight >= 8.0 )
+                if (fallHeight >= 8.0)
                 {
-                    if ( fallHeight >= 12.0 )
+                    if (fallHeight >= 12.0)
                     {
                         VectorScale(pm->velocity, 0.67000002, pm->velocity);
                         hardDmg = PM_HardLandingForSurface(pml);
@@ -3123,6 +3222,8 @@ class libcod
         hook_jmp(0x0808c870, (int)custom_SV_PacketEvent);
         hook_jmp(0x08085eec, (int)custom_SV_SendClientGameState);
         hook_jmp(0x08084d90, (int)custom_SV_GetChallenge);
+        hook_jmp(0x0808b580, (int)custom_SV_CanReplaceServerCommand);
+        //hook_jmp(0x08086e08, (int)custom_SV_ClientCommand);
         
         hook_Sys_LoadDll = new cHook(0x080c5fe4, (int)custom_Sys_LoadDll);
         hook_Sys_LoadDll->hook();

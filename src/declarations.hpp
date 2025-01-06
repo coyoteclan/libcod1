@@ -1186,6 +1186,7 @@ extern stringIndex_t *scr_const;
 
 static const int com_frameTime_offset = 0x0833df1c;
 static const int fs_searchpaths_offset = 0x080dd590;
+static const int com_errorEntered_offset = 0x0833efdc;
 static const int sv_serverId_value_offset = 0x080e30c0;
 static const int sv_offset = 0x08355260;
 static const int svs_offset = 0x083b67a0;
@@ -1207,6 +1208,7 @@ static const int archivedEntityFields_offset = 0x080d1ce0;
 #define sv (*((server_t*)(sv_offset)))
 #define sv_serverId_value (*((int*)(sv_serverId_value_offset)))
 #define svs (*((serverStatic_t*)(svs_offset)))
+#define com_errorEntered (*((int*)(com_errorEntered_offset)))
 #define gvm (*(vm_t**)(gvm_offset))
 #define msgHuff (*((huffman_t*)(msgHuff_offset)))
 #define playerStateFields (*((netField_t*)(playerStateFields_offset)))
@@ -1252,6 +1254,7 @@ typedef struct callback_s
     bool custom;
 } callback_t;
 
+#define MAX_ERROR_BUFFER 64
 typedef struct src_error_s
 {
     char internal_function[64];

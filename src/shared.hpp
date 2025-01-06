@@ -62,6 +62,7 @@ int Q_vsnprintf(char *s0, size_t size, const char *fmt, va_list args);
 const char * stackGetParamTypeAsString(int param);
 int stackGetParams(const char *params, ...);
 void stackError(const char *format, ...);
+void Scr_CodeCallback_Error(qboolean terminal, qboolean emit, const char *internal_function, char *message);
 
 int stackGetParamInt(int param, int *value);
 int stackGetParamFunction(int param, int *value);

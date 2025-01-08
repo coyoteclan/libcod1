@@ -251,6 +251,9 @@ static const MSG_WriteDeltaHudElems_t MSG_WriteDeltaHudElems = (MSG_WriteDeltaHu
 
 typedef char * (*MSG_ReadCommandString_t)(msg_t *msg);
 static const MSG_ReadCommandString_t MSG_ReadCommandString = (MSG_ReadCommandString_t)0x0807f320;
+
+typedef void (*MSG_WriteReliableCommandToBuffer_t)(const char *source, char *destination, int length);
+static const MSG_WriteReliableCommandToBuffer_t MSG_WriteReliableCommandToBuffer = (MSG_WriteReliableCommandToBuffer_t)0x0807f4ec;
 ////
 
 //// NET
@@ -499,6 +502,12 @@ static const SV_UpdateServerCommandsToClient_t SV_UpdateServerCommandsToClient =
 
 typedef void (*SV_SendMessageToClient_t)(msg_t *msg, client_t *cl);
 static const SV_SendMessageToClient_t SV_SendMessageToClient = (SV_SendMessageToClient_t)0x0808f680;
+
+typedef void (*SV_DelayDropClient_t)(client_t *client, const char *dropmsg);
+static const SV_DelayDropClient_t SV_DelayDropClient = (SV_DelayDropClient_t)0x08087880;
+
+typedef int (*SV_CanReplaceServerCommand_t)(client_t *client, const char *cmd);
+static const SV_CanReplaceServerCommand_t SV_CanReplaceServerCommand = (SV_CanReplaceServerCommand_t)0x0808b580;
 ////
 
 //// SVC

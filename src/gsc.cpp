@@ -224,17 +224,18 @@ xmethod_t Scr_GetCustomMethod(const char **fname, qboolean *fdev)
 void stackError(const char *format, ...)
 {
     char s[MAX_STRINGLENGTH];
-    //int len = 0;
+    int len = 0;
     va_list va;
 
     va_start(va, format);
     Q_vsnprintf(s, sizeof(s) - 1, format, va);
     va_end(va);
 
-    /*len = strlen(s);
+    len = strlen(s);
     s[len] = '\n';
-    s[len + 1] = '\0';*/
+    s[len + 1] = '\0';
     Com_PrintMessage(0, s);
+    //Scr_Error(s);
     Scr_CodeCallback_Error(qfalse, qfalse, "stackError", s);
 }
 

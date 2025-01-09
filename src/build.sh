@@ -2,6 +2,8 @@
 
 # E.g.: ./build.sh -d --sqlite
 
+set -e # abort on error
+
 cc="g++"
 options="-I. -m32 -fPIC -Wall -fvisibility=hidden"
 

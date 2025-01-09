@@ -1062,7 +1062,7 @@ typedef struct
     int	ubpsMaxBytes;
     float ucompAve;
     int	ucompNum;
-} server_t; // TODO: Verify, seems to big
+} server_t; // TODO: Verify, seems too big
 
 enum clc_ops_e
 {

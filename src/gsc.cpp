@@ -235,7 +235,6 @@ void stackError(const char *format, ...)
     s[len] = '\n';
     s[len + 1] = '\0';
     Com_PrintMessage(0, s);
-    //Scr_Error(s);
     Scr_CodeCallback_Error(qfalse, qfalse, "stackError", s);
 }
 

@@ -2241,20 +2241,6 @@ void custom_SV_SendMessageToClient(msg_t *msg, client_t *client)
     sv.bpsTotalBytes += compressedSize;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//// Attempting a fix
 qboolean custom_SV_ClientCommand(client_t *cl, msg_t *msg)
 {
     int seq;
@@ -2262,143 +2248,44 @@ qboolean custom_SV_ClientCommand(client_t *cl, msg_t *msg)
     qboolean clientOk;
     qboolean floodprotect;
 
-    clientOk = 1;
-    floodprotect = true;
+    clientOk = qtrue;
+    floodprotect = qtrue;
     seq = MSG_ReadLong(msg);
     s = MSG_ReadCommandString(msg);
 
-    if (seq <= cl->lastClientCommand)
-    {
+    if(seq <= cl->lastClientCommand)
         return qtrue;
-    }
-    if (sv_showCommands->integer)
-    {
+
+    if(sv_showCommands->integer)
         Com_Printf("clientCommand: %i : %s\n", seq, s);
+    
+    if (cl->lastClientCommand + 1 < seq)
+    {
+        Com_Printf("Client %s lost %i clientCommands\n", cl->name, (seq - cl->lastClientCommand) + 1);
+        SV_DropClient(cl, "EXE_LOSTRELIABLECOMMANDS");
+        return qfalse;
+    }
+    
+    if (!I_strncmp("score", s, 5) || !I_strncmp("mr ", s, 3) || !I_strncmp("userinfo ", s, 9) || !I_strncmp("sprint ", s, 6))
+    {
+        floodprotect = qfalse;
+    }
+    
+    if (CS_PRIMED < cl->state && sv_floodProtect->integer && svs.time < cl->nextReliableTime && floodprotect)
+    {
+        clientOk = qfalse;
+        Com_DPrintf("client text ignored for %s: %s\n", cl->name, Cmd_Argv(0));
     }
 
-    if (seq <= cl->lastClientCommand + 1)
-    {
-        if (!I_strncmp("team ", s, 5) || !I_strncmp("score ", s, 6) || !I_strncmp("mr ", s, 3) || !I_strncmp("userinfo ", s, 9))
-        {
-            floodprotect = false;
-        }
-        if (CS_PRIMED < cl->state && sv_floodProtect->integer && svs.time < cl->nextReliableTime && floodprotect)
-        {
-            clientOk = 0;
-            Com_DPrintf("client text ignored for %s: %s\n", cl->name, Cmd_Argv(0));
-        }
-        if (floodprotect)
-        {
-            cl->nextReliableTime = svs.time + 800;
-        }
-        SV_ExecuteClientCommand(cl, s, clientOk);
-        cl->lastClientCommand = seq;
-        Com_sprintf(cl->lastClientCommandString, MAX_STRINGLENGTH, "%s", s);
-        return qtrue;
-    }
-    Com_Printf("Client %s lost %i clientCommands\n", cl->name, (seq - cl->lastClientCommand) + 1);
-    SV_DropClient(cl, "EXE_LOSTRELIABLECOMMANDS");
-    return qfalse;
+    if(floodprotect)
+        cl->nextReliableTime = svs.time + 800;
+
+    SV_ExecuteClientCommand(cl, s, clientOk);
+    cl->lastClientCommand = seq;
+    Com_sprintf(cl->lastClientCommandString, MAX_STRINGLENGTH, "%s", s);
+
+    return qtrue;
 }
-
-
-void SV_CullIgnorableServerCommands(client_t *client)
-{
-    reliableCommands_t *svscmd;
-    int from;
-    int fromIndex;
-    int to;
-
-    to = client->reliableSent + 1;
-
-    for (from = to; from <= client->reliableSequence; ++from)
-    {
-        fromIndex = from & (MAX_RELIABLE_COMMANDS - 1);
-
-        if (client->reliableCommands[fromIndex].cmdType)
-        {
-            if ((to & (MAX_RELIABLE_COMMANDS - 1)) != fromIndex)
-            {
-                svscmd = &client->reliableCommands[to & (MAX_RELIABLE_COMMANDS - 1)];
-                *svscmd = client->reliableCommands[fromIndex];
-            }
-
-            ++to;
-        }
-    }
-
-    client->reliableSequence = to - 1;
-}
-void custom_SV_AddServerCommand(client_t *client, int type, const char *cmd)
-{
-    int from;
-    int to;
-    int index;
-    int i;
-    reliableCommands_t *svscmd;
-
-    if (client->bIsTestClient)
-    {
-        return;
-    }
-
-    if (client->reliableSequence - client->reliableAcknowledge >= MAX_RELIABLE_COMMANDS / 2 || client->state != CS_ACTIVE)
-    {
-        SV_CullIgnorableServerCommands(client);
-
-        if (type == SV_CMD_CAN_IGNORE)
-        {
-            return;
-        }
-    }
-
-    to = SV_CanReplaceServerCommand(client, cmd);
-
-    if (to >= 0)
-    {
-        for (from = to + 1; from <= client->reliableSequence; from++, to++)
-        {
-            svscmd = &client->reliableCommands[to & (MAX_RELIABLE_COMMANDS - 1)];
-            *svscmd = client->reliableCommands[from & (MAX_RELIABLE_COMMANDS - 1)];
-        }
-    }
-    else
-    {
-        client->reliableSequence++;
-    }
-
-    if (client->reliableSequence - client->reliableAcknowledge == MAX_RELIABLE_COMMANDS + 1)
-    {
-        Com_Printf("===== pending server commands =====\n");
-        for (i = client->reliableAcknowledge + 1; i <= client->reliableSequence; ++i)
-        {
-            Com_Printf("cmd %5d: %8d: %s\n", i, client->reliableCommands[i & (MAX_RELIABLE_COMMANDS - 1)].cmdTime, client->reliableCommands[i & (MAX_RELIABLE_COMMANDS - 1)].command);
-        }
-        Com_Printf("cmd %5d: %8d: %s\n", i, svs.time, cmd);
-        NET_OutOfBandPrint(NS_SERVER, client->netchan.remoteAddress, "disconnect");
-        SV_DelayDropClient(client, "EXE_SERVERCOMMANDOVERFLOW");
-        type = SV_CMD_RELIABLE;
-        cmd = "w \"EXE_SERVERCOMMANDOVERFLOW\"";
-    }
-
-    index = client->reliableSequence & (MAX_RELIABLE_COMMANDS - 1);
-    MSG_WriteReliableCommandToBuffer(cmd, client->reliableCommands[index].command, sizeof(client->reliableCommands[index].command));
-
-    client->reliableCommands[index].cmdTime = svs.time;
-    client->reliableCommands[index].cmdType = type;
-}
-////
-
-
-
-
-
-
-
-
-
-
-
 
 void hook_ClientCommand(int clientNum)
 {
@@ -2412,7 +2299,7 @@ void hook_ClientCommand(int clientNum)
         return;
 
     // [glitch patch] follow while alive
-    if(!strcmp(cmd, "follownext") || !strcmp(cmd, "followprev"))
+    if(!strcmp(cmd, "follownext") || !strcmp(cmd, "followprev")) // Not checking if alive, client doesn't call these commands when clicking as spectator
         return;
 
     if (!codecallback_playercommand)
@@ -3366,8 +3253,7 @@ class libcod
         hook_jmp(0x08085eec, (int)custom_SV_SendClientGameState);
         hook_jmp(0x08084d90, (int)custom_SV_GetChallenge);
         hook_jmp(0x0808b580, (int)custom_SV_CanReplaceServerCommand);
-        //hook_jmp(0x08086e08, (int)custom_SV_ClientCommand);
-        //hook_jmp(0x0808b680, (int)custom_SV_AddServerCommand);
+        hook_jmp(0x08086e08, (int)custom_SV_ClientCommand);
         
         hook_Sys_LoadDll = new cHook(0x080c5fe4, (int)custom_Sys_LoadDll);
         hook_Sys_LoadDll->hook();

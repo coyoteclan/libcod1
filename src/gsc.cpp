@@ -491,15 +491,16 @@ void gsc_testmethod(scr_entref_t ref)
     //client_t* client = &svs.clients[id];
     //playerState_t *ps = SV_GameClientNum(id);
     //gentity_t *gentity = &g_entities[id];
+    //weaponinfo_t *weapon = BG_GetInfoForWeapon(ps->weapon);
 
 
-    /*printf("###### viewangles[0] = %f\n", ps->viewangles[0]);
-    printf("###### viewangles[1] = %f\n", ps->viewangles[1]);
-    printf("###### viewangles[2] = %f\n", ps->viewangles[2]);
+    
 
-    printf("###### origin[0] = %f\n", ps->origin[0]);
-    printf("###### origin[1] = %f\n", ps->origin[1]);
-    printf("###### origin[2] = %f\n", ps->origin[2]);*/
+    /*printf("###### ps->weapon = %i\n", ps->weapon);
+    printf("###### weapon->maxAmmo = %i\n", weapon->maxAmmo);*/
+
+
+
     
 
 

@@ -42,7 +42,7 @@ typedef int (*Jump_Check_t)();
 typedef int (*BG_GetNumWeapons_t)(void);
 extern BG_GetNumWeapons_t BG_GetNumWeapons;
 
-typedef WeaponDef_t* (*BG_GetInfoForWeapon_t)(unsigned int weaponIndex);
+typedef weaponinfo_t* (*BG_GetInfoForWeapon_t)(unsigned int weaponIndex);
 extern BG_GetInfoForWeapon_t BG_GetInfoForWeapon;
 
 typedef int (*BG_GetWeaponIndexForName_t)(const char *name);

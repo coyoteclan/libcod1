@@ -33,7 +33,7 @@ void gsc_weapons_setweaponcookable()
         return;
     }
 
-    WeaponDef_t *weapon = BG_GetInfoForWeapon(id);
+    weaponinfo_t *weapon = BG_GetInfoForWeapon(id);
     weapon->cookOffHold = cookable;
 
     stackPushBool(qtrue);
@@ -62,7 +62,7 @@ void gsc_weapons_setweaponfusetime()
         return;
     }
 
-    WeaponDef_t *weapon = BG_GetInfoForWeapon(id);
+    weaponinfo_t *weapon = BG_GetInfoForWeapon(id);
     weapon->fuseTime = time;
 
     stackPushBool(qtrue);

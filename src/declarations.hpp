@@ -1085,30 +1085,32 @@ typedef enum
     EXEC_APPEND
 } cbufExec_t;
 
-typedef struct WeaponDef_t
+typedef struct weaponinfo_t
 {
-    int number;
-    char* name;
-    char* displayName;
-    byte gap[0x1E4];
-    int reloadAddTime;
-    byte gap2[0x1C];
-    int fuseTime;
-    float moveSpeedScale;
-    float adsZoomFov;
-    float adsZoomInFrac;
-    float adsZoomOutFrac;
-    byte gap3[0x44];
-    int adsTransInTime;
-    int adsTransOutTime;
-    byte gap4[0x8];
-    float idleCrouchFactor;
-    float idleProneFactor;
-    byte gap5[0x50];
-    int cookOffHold;
-    int clipOnly;
+    int number;             // 0x0
+    char* name;             // 0x4
+    char* displayName;      // 0x8
+    byte gap_0xC[0x1A0];
+    int maxAmmo;            // 0x1AC
+    byte gap_0x1B0[0x40];
+    int reloadAddTime;      // 0x1F0
+    byte gap_0x1F4[0x1C];
+    int fuseTime;           // 0x210
+    float moveSpeedScale;   // 0x214
+    float adsZoomFov;       // 0x218
+    float adsZoomInFrac;    // 0x21C
+    float adsZoomOutFrac;   // 0x220
+    byte gap_0x224[0x44];
+    int adsTransInTime;     // 0x268
+    int adsTransOutTime;    // 0x26C
+    byte gap_0x270[0x8];
+    float idleCrouchFactor; // 0x278
+    float idleProneFactor;  // 0x27C
+    byte gap_0x280[0x50];
+    int cookOffHold;        // 0x2D0
+    int clipOnly;           // 0x2D4
     //...
-} WeaponDef_t;
+} weaponinfo_t;
 
 typedef enum
 {

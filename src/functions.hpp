@@ -73,6 +73,9 @@ static const Cmd_ArgvBuffer_t Cmd_ArgvBuffer = (Cmd_ArgvBuffer_t)0x0805b27c;
 
 typedef void (*Cmd_TokenizeString_t)(const char *text_in);
 static const Cmd_TokenizeString_t Cmd_TokenizeString = (Cmd_TokenizeString_t)0x0805b398;
+
+typedef void (*Cmd_ExecuteString_t)(const char *cmd);
+static const Cmd_ExecuteString_t Cmd_ExecuteString = (Cmd_ExecuteString_t)0x0805afe0;
 ////
 
 //// Com
@@ -99,6 +102,18 @@ typedef void (*Com_SkipRestOfLine_t)(const char **data);
 typedef char* (*Com_ParseRestOfLine_t)(const char **data);
 
 typedef int (*Com_ParseInt_t)(const char **data);
+
+typedef int (*Com_Milliseconds_t)(void);
+static const Com_Milliseconds_t Com_Milliseconds = (Com_Milliseconds_t)0x0806d988;
+
+typedef void (*Com_BeginRedirect_t)(char *buffer, int buffersize, void (*flush)(char *));
+static const Com_BeginRedirect_t Com_BeginRedirect = (Com_BeginRedirect_t)0x0806d8a0;
+
+typedef unsigned int (*Com_AddToString_t)(const char* string, char* buffer, unsigned int current, unsigned int length, byte escapeSpaces);
+static const Com_AddToString_t Com_AddToString = (Com_AddToString_t)0x0806dbd4;
+
+typedef void (*Com_EndRedirect_t)(void);
+static const Com_EndRedirect_t Com_EndRedirect = (Com_EndRedirect_t)0x0806d8d0;
 ////
 
 //// Cvar
@@ -508,6 +523,9 @@ static const SV_DelayDropClient_t SV_DelayDropClient = (SV_DelayDropClient_t)0x0
 
 typedef int (*SV_CanReplaceServerCommand_t)(client_t *client, const char *cmd);
 static const SV_CanReplaceServerCommand_t SV_CanReplaceServerCommand = (SV_CanReplaceServerCommand_t)0x0808b580;
+
+typedef void (*SV_FlushRedirect_t)(char *outputbuf);
+static const SV_FlushRedirect_t SV_FlushRedirect = (SV_FlushRedirect_t)0x0808d318;
 ////
 
 //// SVC

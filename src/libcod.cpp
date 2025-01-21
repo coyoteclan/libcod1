@@ -1136,15 +1136,82 @@ bool str_iseq(const char *s1, const char *s2)
 
     return m == 0;
 }
-void hook_SVC_RemoteCommand(netadr_t from, msg_t *msg)
+
+void custom_SVC_RemoteCommand(netadr_t from, msg_t *msg)
 {
-    char* password = Cmd_Argv(1);
+    char sv_outputbuf[SV_OUTPUTBUF_LENGTH];
+    int argc;
+    char *argv;
+    char *password;
+    char remaining[1024];
+    int len;
+    int max_len;
+    int arg;
+    bool valid;
+
+    //// [exploit patch] RCON half-second limit
+    /* See:
+    - https://aluigi.altervista.org/patches/q3rconz.lpatch
+    - https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/codextended.c#L291
+    - https://github.com/ibuddieat/zk_libcod/blob/dec45a39e3ae8f049cf5d7f4f5b8ec89dea88b3d/code/libcod.cpp#L4865
+    */
+    // (patch = no more return)
+
+    /*int time = Com_Milliseconds();
+    if(rcon_lasttime && time < (rcon_lasttime + 500))
+        return;
+    rcon_lasttime = time;*/
+    ////
+
+    password = Cmd_Argv(1);
     qboolean badRconPassword = !strlen(sv_rconPassword->string) || !str_iseq(password, sv_rconPassword->string);
-    
+
     if(SVC_ApplyRconLimit(from, badRconPassword))
         return;
-    
-    SVC_RemoteCommand(from, msg);
+
+    if (badRconPassword)
+    {
+        valid = false;
+        Com_Printf("Bad rcon from %s:\n%s\n", NET_AdrToString(from), Cmd_Argv(2));
+    }
+    else
+    {
+        valid = true;
+        Com_Printf("Rcon from %s:\n%s\n", NET_AdrToString(from), Cmd_Argv(2));
+    }
+
+    svs.redirectAddress = from;
+
+    Com_BeginRedirect(sv_outputbuf, SV_OUTPUTBUF_LENGTH, SV_FlushRedirect);
+
+    if (!strlen(sv_rconPassword->string))
+    {
+        Com_Printf("No rconpassword set on the server.\n");
+    }
+    else if (!valid)
+    {
+        Com_Printf("Bad rconpassword.\n");
+    }
+    else
+    {
+        len = 0;
+        max_len = MAX_STRINGLENGTH;
+        arg = 2;
+        while (argc = Cmd_Argc(), arg < argc)
+        {
+            argv = Cmd_Argv(arg);
+            len = Com_AddToString(argv, remaining, len, max_len, 1);
+            len = Com_AddToString(" ", remaining, len, max_len, 0);
+            arg++;
+        }
+        if (len < max_len)
+        {
+            remaining[len] = 0;
+            Cmd_ExecuteString(remaining);
+        }
+    }
+
+    Com_EndRedirect();
 }
 
 const char* hook_AuthorizeState(int arg)
@@ -3223,14 +3290,6 @@ class libcod
         - https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/codextended.c#L295
         */
         *(byte*)0x807f459 = 1;
-
-        // Patch RCON half-second limit //TODO: Do like zk_libcod instead
-        /* See:
-        - https://aluigi.altervista.org/patches/q3rconz.lpatch
-        - https://github.com/xtnded/codextended/blob/855df4fb01d20f19091d18d46980b5fdfa95a712/src/codextended.c#L291
-        - https://github.com/ibuddieat/zk_libcod/blob/0f07cacf303d104a0375bf6235b8013e30b668ca/code/libcod.cpp#L3486
-        */
-        *(unsigned char*)0x808C41F = 0xeb;
         
         hook_call(0x08085213, (int)hook_AuthorizeState);
         hook_call(0x08094c54, (int)Scr_GetCustomFunction);
@@ -3239,7 +3298,6 @@ class libcod
         hook_call(0x0808c7ea, (int)hook_SV_AuthorizeIpPacket);
         hook_call(0x0808c74e, (int)hook_SVC_Info);
         hook_call(0x0808c71c, (int)hook_SVC_Status);
-        hook_call(0x0808c81d, (int)hook_SVC_RemoteCommand);
 
         hook_jmp(0x080717a4, (int)custom_FS_ReferencedPakChecksums);
         hook_jmp(0x080716cc, (int)custom_FS_ReferencedPakNames);
@@ -3254,6 +3312,7 @@ class libcod
         hook_jmp(0x08084d90, (int)custom_SV_GetChallenge);
         hook_jmp(0x0808b580, (int)custom_SV_CanReplaceServerCommand);
         hook_jmp(0x08086e08, (int)custom_SV_ClientCommand);
+        hook_jmp(0x0808c404, (int)custom_SVC_RemoteCommand);
         
         hook_Sys_LoadDll = new cHook(0x080c5fe4, (int)custom_Sys_LoadDll);
         hook_Sys_LoadDll->hook();

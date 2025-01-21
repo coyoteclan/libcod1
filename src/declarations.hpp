@@ -10,6 +10,7 @@
 #define GENTITYNUM_BITS 10
 #define PACKET_BACKUP 32
 #define PACKET_MASK (PACKET_BACKUP - 1)
+#define SV_OUTPUTBUF_LENGTH (2048 * MAX_CLIENTS - 16) // Stock = (256 * MAX_CLIENTS - 16)
 #define HEADER_RATE_BYTES 48
 #define SNAPFLAG_SERVERCOUNT 4
 #define GAME_INIT_FRAMES 3
@@ -1201,6 +1202,7 @@ static const int entityStateFields_offset = 0x080d1760;
 static const int objectiveFields_offset = 0x080de384;
 static const int clientStateFields_offset = 0x080d2058;
 static const int archivedEntityFields_offset = 0x080d1ce0;
+static const int rcon_lasttime_offset = 0x080e30c8;
 
 
 #define com_frameTime (*((int*)(com_frameTime_offset)))
@@ -1218,6 +1220,7 @@ static const int archivedEntityFields_offset = 0x080d1ce0;
 #define objectiveFields (*((netField_t*)(objectiveFields_offset)))
 #define clientStateFields (*((netField_t*)(clientStateFields_offset)))
 #define archivedEntityFields (*((netField_t*)(archivedEntityFields_offset)))
+#define rcon_lasttime (*((int*)(rcon_lasttime_offset)))
 
 // Require structure sizes to match
 #if __GNUC__ >= 6

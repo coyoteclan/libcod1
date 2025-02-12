@@ -128,6 +128,12 @@ static const Cvar_FindVar_t Cvar_FindVar = (Cvar_FindVar_t)0x0806e9b4;
 
 typedef char* (*Cvar_VariableString_t)(const char *cvarName);
 static const Cvar_VariableString_t Cvar_VariableString = (Cvar_VariableString_t)0x0806f8ec;
+
+typedef float (*Cvar_VariableValue_t)(const char *var_name);
+static const Cvar_VariableValue_t Cvar_VariableValue = (Cvar_VariableValue_t)0x0806f8a0;
+
+typedef char* (*Cvar_InfoString_t)(int bit);
+static const Cvar_InfoString_t Cvar_InfoString = (Cvar_InfoString_t)0x0806fc30;
 ////
 
 //// FS

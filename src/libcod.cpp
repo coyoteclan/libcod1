@@ -47,6 +47,8 @@ cvar_t *sv_downloadForce;
 cvar_t *sv_downloadNotifications;
 cvar_t *sv_fastDownload;
 cvar_t *sv_heartbeatDelay;
+cvar_t *sv_statusShowDeath;
+cvar_t *sv_statusShowTeamScore;
 cvar_t *sv_spectatorNoclip;
 cvar_t *player_sprint;
 cvar_t *player_sprintMinTime;
@@ -371,6 +373,8 @@ void custom_Com_Init(char *commandLine)
     sv_downloadNotifications = Cvar_Get("sv_downloadNotifications", "0", CVAR_ARCHIVE);
     sv_fastDownload = Cvar_Get("sv_fastDownload", "0", CVAR_ARCHIVE);
     sv_heartbeatDelay = Cvar_Get("sv_heartbeatDelay", "30", CVAR_ARCHIVE);
+    sv_statusShowDeath = Cvar_Get("sv_statusShowDeath", "0", CVAR_ARCHIVE);
+    sv_statusShowTeamScore = Cvar_Get("sv_statusShowTeamScore", "0", CVAR_ARCHIVE);
     sv_spectatorNoclip = Cvar_Get("sv_spectatorNoclip", "0", CVAR_ARCHIVE);
     ////
 }
@@ -1103,11 +1107,76 @@ void hook_SVC_Info(netadr_t from)
     SVC_Info(from);
 }
 
-void hook_SVC_Status(netadr_t from)
+void custom_SVC_Status(netadr_t from)
 {
+    char player[MAX_INFO_STRING];
+    char infostring[MAX_INFO_STRING];
+    char keywords[MAX_INFO_STRING];
+    char status[MAX_MSGLEN];
+    int statusLength;
+    size_t playerLength;
+    int i;
+    client_t *cl;
+    char *g_password;
+
     if(SVC_ApplyStatusLimit(from))
         return;
-    SVC_Status(from);
+    
+    strcpy(infostring, Cvar_InfoString(CVAR_SERVERINFO));
+    
+    Info_SetValueForKey(infostring, "challenge", Cmd_Argv(1));
+    
+    if (Cvar_VariableValue("fs_restrict"))
+    {
+        Com_sprintf(keywords, sizeof(keywords), "demo %s", Info_ValueForKey(infostring, "sv_keywords"));
+        Info_SetValueForKey(infostring, "sv_keywords", keywords);
+    }
+    
+    status[0] = 0;
+    statusLength = 0;
+    for (i = 0; i < sv_maxclients->integer; i++)
+    {
+        cl = &svs.clients[i];
+        if (cl->state >= CS_CONNECTED)
+        {
+            int clientScore = 0;
+            int clientDeath = 0;
+            if (gvm)
+            {
+                clientScore = VM_Call(gvm, 0x14, cl - svs.clients); // Get client score
+                clientDeath = cl->gentity->client->sess.deaths;
+            }
+
+            if(sv_statusShowDeath->integer)
+                Com_sprintf(player, sizeof(player), "%s %i \"%s\"\n", va("k:%i;d:%i", clientScore, clientDeath), cl->ping, cl->name);
+            else
+                Com_sprintf(player, sizeof(player), "%i %i \"%s\"\n", clientScore, cl->ping, cl->name);
+            
+            playerLength = strlen(player);
+            if(statusLength + playerLength >= sizeof(status))
+                break;
+
+            strcpy(status + statusLength, player);
+            statusLength += playerLength;
+        }
+    }
+    
+    g_password = Cvar_VariableString("g_password");
+    Info_SetValueForKey(infostring, "pswrd", va("%i", *g_password ? 1 : 0));
+
+    // Inform about fs_game usage, by default for player's convenience
+    Info_SetValueForKey(infostring, "fs_game", va("%s", *fs_game->string ? fs_game->string : "0"));
+
+    if (sv_statusShowTeamScore->integer)
+    {
+        if (gvm)
+        {
+            Info_SetValueForKey(infostring, "score_allies", va("%i", level->teamScores[2]));
+            Info_SetValueForKey(infostring, "score_axis", va("%i", level->teamScores[1]));
+        }
+    }
+    
+    NET_OutOfBandPrint(NS_SERVER, from, "statusResponse\n%s\n%s", infostring, status);
 }
 
 // See https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/
@@ -3297,7 +3366,6 @@ class libcod
         hook_call(0x0808c7b8, (int)hook_SV_DirectConnect);
         hook_call(0x0808c7ea, (int)hook_SV_AuthorizeIpPacket);
         hook_call(0x0808c74e, (int)hook_SVC_Info);
-        hook_call(0x0808c71c, (int)hook_SVC_Status);
 
         hook_jmp(0x080717a4, (int)custom_FS_ReferencedPakChecksums);
         hook_jmp(0x080716cc, (int)custom_FS_ReferencedPakNames);
@@ -3313,6 +3381,7 @@ class libcod
         hook_jmp(0x0808b580, (int)custom_SV_CanReplaceServerCommand);
         hook_jmp(0x08086e08, (int)custom_SV_ClientCommand);
         hook_jmp(0x0808c404, (int)custom_SVC_RemoteCommand);
+        hook_jmp(0x0808bd58, (int)custom_SVC_Status);
         
         hook_Sys_LoadDll = new cHook(0x080c5fe4, (int)custom_Sys_LoadDll);
         hook_Sys_LoadDll->hook();

@@ -1204,7 +1204,6 @@ static const int clientStateFields_offset = 0x080d2058;
 static const int archivedEntityFields_offset = 0x080d1ce0;
 static const int rcon_lasttime_offset = 0x080e30c8;
 
-
 #define com_frameTime (*((int*)(com_frameTime_offset)))
 #define fs_searchpaths (*((searchpath_t**)(fs_searchpaths_offset)))
 #define scrVarPub (*((scrVarPub_t*)(varpub_offset)))

@@ -3,7 +3,7 @@
 Supported game version: **1.1**
 ___
 ### Installation and usage
-See the [Wiki](https://github.com/cod1dev/libcod1/wiki)
+See the [Wiki](https://github.com/raphael12333/libcod1/wiki)
 ___
 #### References
 - [Killtube](https://www.killtube.org/)

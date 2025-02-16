@@ -8,8 +8,7 @@ Linux inline asm notes
 - pushal:   save general-purpose registers
 - popal:    restore general-purpose registers
 
-Add a suffix to an instruction to indicate the size/type of the operand,
-to avoid incorrect code generation and compiler warnings.
+Can add a suffix to an instruction to indicate the size/type of the operand:
 - b: byte
 - w: word
 - l: long

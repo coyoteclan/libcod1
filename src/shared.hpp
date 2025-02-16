@@ -9,7 +9,7 @@
 #include <stdarg.h>     // va
 #include <string>
 
-#include "declarations.hpp"
+#include "types.hpp"
 #include "functions.hpp"
 
 #include "gsc_entity.hpp"

@@ -276,16 +276,16 @@ typedef void (*xmethod_t)(scr_entref_t);
 
 typedef struct scr_function_s
 {
-    const char      *name;
-    xfunction_t     call;
-    qboolean        developer;
+    const char *name;
+    xfunction_t call;
+    qboolean developer;
 } scr_function_t;
 
 typedef struct scr_method_s
 {
-    const char     *name;
-    xmethod_t      call;
-    qboolean       developer;
+    const char *name;
+    xmethod_t call;
+    qboolean developer;
 } scr_method_t;
 
 struct directory_t
@@ -326,213 +326,15 @@ struct searchpath_t
 
 typedef enum
 {
-    EV_NONE,
-    EV_FOOTSTEP_RUN_DEFAULT,
-    EV_FOOTSTEP_RUN_BARK,
-    EV_FOOTSTEP_RUN_BRICK,
-    EV_FOOTSTEP_RUN_CARPET,
-    EV_FOOTSTEP_RUN_CLOTH,
-    EV_FOOTSTEP_RUN_CONCRETE,
-    EV_FOOTSTEP_RUN_DIRT,
-    EV_FOOTSTEP_RUN_FLESH,
-    EV_FOOTSTEP_RUN_FOLIAGE,
-    EV_FOOTSTEP_RUN_GLASS,
-    EV_FOOTSTEP_RUN_GRASS,
-    EV_FOOTSTEP_RUN_GRAVEL,
-    EV_FOOTSTEP_RUN_ICE,
-    EV_FOOTSTEP_RUN_METAL,
-    EV_FOOTSTEP_RUN_MUD,
-    EV_FOOTSTEP_RUN_PAPER,
-    EV_FOOTSTEP_RUN_PLASTER,
-    EV_FOOTSTEP_RUN_ROCK,
-    EV_FOOTSTEP_RUN_SAND,
-    EV_FOOTSTEP_RUN_SNOW,
-    EV_FOOTSTEP_RUN_WATER,
-    EV_FOOTSTEP_RUN_WOOD,
-    EV_FOOTSTEP_RUN_ASPHALT,
-    EV_FOOTSTEP_WALK_DEFAULT,
-    EV_FOOTSTEP_WALK_BARK,
-    EV_FOOTSTEP_WALK_BRICK,
-    EV_FOOTSTEP_WALK_CARPET,
-    EV_FOOTSTEP_WALK_CLOTH,
-    EV_FOOTSTEP_WALK_CONCRETE,
-    EV_FOOTSTEP_WALK_DIRT,
-    EV_FOOTSTEP_WALK_FLESH,
-    EV_FOOTSTEP_WALK_FOLIAGE,
-    EV_FOOTSTEP_WALK_GLASS,
-    EV_FOOTSTEP_WALK_GRASS,
-    EV_FOOTSTEP_WALK_GRAVEL,
-    EV_FOOTSTEP_WALK_ICE,
-    EV_FOOTSTEP_WALK_METAL,
-    EV_FOOTSTEP_WALK_MUD,
-    EV_FOOTSTEP_WALK_PAPER,
-    EV_FOOTSTEP_WALK_PLASTER,
-    EV_FOOTSTEP_WALK_ROCK,
-    EV_FOOTSTEP_WALK_SAND,
-    EV_FOOTSTEP_WALK_SNOW,
-    EV_FOOTSTEP_WALK_WATER,
-    EV_FOOTSTEP_WALK_WOOD,
-    EV_FOOTSTEP_WALK_ASPHALT,
-    EV_FOOTSTEP_PRONE_DEFAULT,
-    EV_FOOTSTEP_PRONE_BARK,
-    EV_FOOTSTEP_PRONE_BRICK,
-    EV_FOOTSTEP_PRONE_CARPET,
-    EV_FOOTSTEP_PRONE_CLOTH,
-    EV_FOOTSTEP_PRONE_CONCRETE,
-    EV_FOOTSTEP_PRONE_DIRT,
-    EV_FOOTSTEP_PRONE_FLESH,
-    EV_FOOTSTEP_PRONE_FOLIAGE,
-    EV_FOOTSTEP_PRONE_GLASS,
-    EV_FOOTSTEP_PRONE_GRASS,
-    EV_FOOTSTEP_PRONE_GRAVEL,
-    EV_FOOTSTEP_PRONE_ICE,
-    EV_FOOTSTEP_PRONE_METAL,
-    EV_FOOTSTEP_PRONE_MUD,
-    EV_FOOTSTEP_PRONE_PAPER,
-    EV_FOOTSTEP_PRONE_PLASTER,
-    EV_FOOTSTEP_PRONE_ROCK,
-    EV_FOOTSTEP_PRONE_SAND,
-    EV_FOOTSTEP_PRONE_SNOW,
-    EV_FOOTSTEP_PRONE_WATER,
-    EV_FOOTSTEP_PRONE_WOOD,
-    EV_FOOTSTEP_PRONE_ASPHALT,
-    EV_JUMP_DEFAULT,
-    EV_JUMP_BARK,
-    EV_JUMP_BRICK,
-    EV_JUMP_CARPET,
-    EV_JUMP_CLOTH,
-    EV_JUMP_CONCRETE,
-    EV_JUMP_DIRT,
-    EV_JUMP_FLESH,
-    EV_JUMP_FOLIAGE,
-    EV_JUMP_GLASS,
-    EV_JUMP_GRASS,
-    EV_JUMP_GRAVEL,
-    EV_JUMP_ICE,
-    EV_JUMP_METAL,
-    EV_JUMP_MUD,
-    EV_JUMP_PAPER,
-    EV_JUMP_PLASTER,
-    EV_JUMP_ROCK,
-    EV_JUMP_SAND,
-    EV_JUMP_SNOW,
-    EV_JUMP_WATER,
-    EV_JUMP_WOOD,
-    EV_JUMP_ASPHALT,
-    EV_LANDING_DEFAULT,
-    EV_LANDING_BARK,
-    EV_LANDING_BRICK,
-    EV_LANDING_CARPET,
-    EV_LANDING_CLOTH,
-    EV_LANDING_CONCRETE,
-    EV_LANDING_DIRT,
-    EV_LANDING_FLESH,
-    EV_LANDING_FOLIAGE,
-    EV_LANDING_GLASS,
-    EV_LANDING_GRASS,
-    EV_LANDING_GRAVEL,
-    EV_LANDING_ICE,
-    EV_LANDING_METAL,
-    EV_LANDING_MUD,
-    EV_LANDING_PAPER,
-    EV_LANDING_PLASTER,
-    EV_LANDING_ROCK,
-    EV_LANDING_SAND,
-    EV_LANDING_SNOW,
-    EV_LANDING_WATER,
-    EV_LANDING_WOOD,
-    EV_LANDING_ASPHALT,
-    EV_LANDING_PAIN_DEFAULT,
-    EV_LANDING_PAIN_BARK,
-    EV_LANDING_PAIN_BRICK,
-    EV_LANDING_PAIN_CARPET,
-    EV_LANDING_PAIN_CLOTH,
-    EV_LANDING_PAIN_CONCRETE,
-    EV_LANDING_PAIN_DIRT,
-    EV_LANDING_PAIN_FLESH,
-    EV_LANDING_PAIN_FOLIAGE,
-    EV_LANDING_PAIN_GLASS,
-    EV_LANDING_PAIN_GRASS,
-    EV_LANDING_PAIN_GRAVEL,
-    EV_LANDING_PAIN_ICE,
-    EV_LANDING_PAIN_METAL,
-    EV_LANDING_PAIN_MUD,
-    EV_LANDING_PAIN_PAPER,
-    EV_LANDING_PAIN_PLASTER,
-    EV_LANDING_PAIN_ROCK,
-    EV_LANDING_PAIN_SAND,
-    EV_LANDING_PAIN_SNOW,
-    EV_LANDING_PAIN_WATER,
-    EV_LANDING_PAIN_WOOD,
-    EV_LANDING_PAIN_ASPHALT,
-    EV_FOLIAGE_SOUND,
-    EV_STANCE_FORCE_STAND,
-    EV_STANCE_FORCE_CROUCH,
-    EV_STANCE_FORCE_PRONE,
-    EV_STEP_VIEW,
-    EV_WATER_TOUCH,
-    EV_WATER_LEAVE,
-    EV_ITEM_PICKUP,
-    EV_ITEM_PICKUP_QUIET,
-    EV_AMMO_PICKUP,
-    EV_NOAMMO,
-    EV_EMPTYCLIP,
-    EV_RELOAD,
-    EV_RELOAD_FROM_EMPTY,
-    EV_RELOAD_START,
-    EV_RELOAD_END,
-    EV_RAISE_WEAPON,
-    EV_PUTAWAY_WEAPON,
-    EV_WEAPON_ALT,
-    EV_PULLBACK_WEAPON,
-    EV_FIRE_WEAPON,
-    EV_FIRE_WEAPONB,
-    EV_FIRE_WEAPON_LASTSHOT,
-    EV_RECHAMBER_WEAPON,
-    EV_EJECT_BRASS,
-    EV_MELEE_SWIPE,
-    EV_FIRE_MELEE,
-    EV_MELEE_HIT,
-    EV_MELEE_MISS,
-    EV_FIRE_WEAPON_MG42,
-    EV_FIRE_QUADBARREL_1,
-    EV_FIRE_QUADBARREL_2,
-    EV_BULLET_TRACER,
-    EV_SOUND_ALIAS,
-    EV_BULLET_HIT_SMALL,
-    EV_BULLET_HIT_LARGE,
-    EV_BULLET_HIT_CLIENT_SMALL,
-    EV_BULLET_HIT_CLIENT_LARGE,
-    EV_GRENADE_BOUNCE,
-    EV_GRENADE_EXPLODE,
-    EV_ROCKET_EXPLODE,
-    EV_ROCKET_EXPLODE_NOMARKS,
-    EV_CUSTOM_EXPLODE,
-    EV_CUSTOM_EXPLODE_NOMARKS,
-    EV_RAILTRAIL,
-    EV_BULLET,
-    EV_PAIN,
-    EV_CROUCH_PAIN,
-    EV_DEATH,
-    EV_DEBUG_LINE,
-    EV_PLAY_FX,
-    EV_PLAY_FX_DIR,
-    EV_PLAY_FX_ON_TAG,
-    EV_FLAMEBARREL_BOUNCE,
-    EV_EARTHQUAKE,
-    EV_DROPWEAPON,
-    EV_ITEM_RESPAWN,
-    EV_ITEM_POP,
-    EV_PLAYER_TELEPORT_IN,
-    EV_PLAYER_TELEPORT_OUT,
-    EV_OBITUARY
+    EV_STANCE_FORCE_STAND = 0x8c,
+    // ...
 } entity_event_t;
 
 typedef struct nodetype
 {
-    struct  nodetype *left, *right, *parent;
-    struct  nodetype *next, *prev;
-    struct  nodetype **head;
+    struct nodetype *left, *right, *parent;
+    struct nodetype *next, *prev;
+    struct nodetype **head;
     int weight;
     int symbol;
 } node_t;
@@ -580,8 +382,8 @@ typedef struct trace_s
 typedef struct usercmd_s
 {
     int serverTime;
-    byte buttons; // console, chat, ads, attack, use
-    byte wbuttons; // lean left, lean right, reload
+    byte buttons;   // console, chat, ads, attack, use
+    byte wbuttons;  // lean left, lean right, reload
     byte weapon;
     byte flags;
     int angles[3];
@@ -1187,39 +989,22 @@ typedef struct
 extern gentity_t *g_entities;
 extern stringIndex_t *scr_const;
 
-static const int com_frameTime_offset = 0x0833df1c;
-static const int fs_searchpaths_offset = 0x080dd590;
-static const int com_errorEntered_offset = 0x0833efdc;
-static const int sv_serverId_value_offset = 0x080e30c0;
-static const int sv_offset = 0x08355260;
-static const int svs_offset = 0x083b67a0;
-static const int varpub_offset = 0x082f17d8;
-static const int vmpub_offset = 0x082f57e0;
-static const int gvm_offset = 0x080e30c4;
-static const int msgHuff_offset = 0x0813e740;
-static const int playerStateFields_offset = 0x080d229c;
-static const int entityStateFields_offset = 0x080d1760;
-static const int objectiveFields_offset = 0x080de384;
-static const int clientStateFields_offset = 0x080d2058;
-static const int archivedEntityFields_offset = 0x080d1ce0;
-static const int rcon_lasttime_offset = 0x080e30c8;
-
-#define com_frameTime (*((int*)(com_frameTime_offset)))
-#define fs_searchpaths (*((searchpath_t**)(fs_searchpaths_offset)))
-#define scrVarPub (*((scrVarPub_t*)(varpub_offset)))
-#define scrVmPub (*((scrVmPub_t*)(vmpub_offset)))
-#define sv (*((server_t*)(sv_offset)))
-#define sv_serverId_value (*((int*)(sv_serverId_value_offset)))
-#define svs (*((serverStatic_t*)(svs_offset)))
-#define com_errorEntered (*((int*)(com_errorEntered_offset)))
-#define gvm (*(vm_t**)(gvm_offset))
-#define msgHuff (*((huffman_t*)(msgHuff_offset)))
-#define playerStateFields (*((netField_t*)(playerStateFields_offset)))
-#define entityStateFields (*((netField_t*)(entityStateFields_offset)))
-#define objectiveFields (*((netField_t*)(objectiveFields_offset)))
-#define clientStateFields (*((netField_t*)(clientStateFields_offset)))
-#define archivedEntityFields (*((netField_t*)(archivedEntityFields_offset)))
-#define rcon_lasttime (*((int*)(rcon_lasttime_offset)))
+#define com_frameTime (*((int*)(0x0833df1c)))
+#define fs_searchpaths (*((searchpath_t**)(0x080dd590)))
+#define scrVarPub (*((scrVarPub_t*)(0x082f17d8)))
+#define scrVmPub (*((scrVmPub_t*)(0x082f57e0)))
+#define sv (*((server_t*)(0x08355260)))
+#define sv_serverId_value (*((int*)(0x080e30c0)))
+#define svs (*((serverStatic_t*)(0x083b67a0)))
+#define com_errorEntered (*((int*)(0x0833efdc)))
+#define gvm (*(vm_t**)(0x080e30c4))
+#define msgHuff (*((huffman_t*)(0x0813e740)))
+#define playerStateFields (*((netField_t*)(0x080d229c)))
+#define entityStateFields (*((netField_t*)(0x080d1760)))
+#define objectiveFields (*((netField_t*)(0x080de384)))
+#define clientStateFields (*((netField_t*)(0x080d2058)))
+#define archivedEntityFields (*((netField_t*)(0x080d1ce0)))
+#define rcon_lasttime (*((int*)(0x080e30c8)))
 
 // Require structure sizes to match
 #if __GNUC__ >= 6
@@ -1240,6 +1025,7 @@ static_assert((sizeof(challenge_t) == 44), "ERROR: challenge_t size is invalid")
 
 
 //// Custom
+
 typedef struct leakyBucket_s leakyBucket_t;
 struct leakyBucket_s
 {
@@ -1267,7 +1053,7 @@ typedef struct src_error_s
 
 typedef struct customPlayerState_s
 {
-    //// Bots
+    //// Bots    
     int botButtons;
     int botWButtons;
     int botWeapon;

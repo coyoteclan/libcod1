@@ -64,6 +64,7 @@ else
     constants+=" -D ENABLE_UNSAFE=0"
 fi
 
+# SQLite
 sqlite_found=0
 sqlite_link=""
 sqlite_libpath="/usr/lib32/libsqlite3.so"
@@ -86,6 +87,7 @@ else
     constants+=" -D COMPILE_SQLITE=0"
 fi
 
+# cURL
 curl_found=0
 curl_link=""
 curl_libpath="/usr/lib/i386-linux-gnu/libcurl.so.4"
@@ -106,6 +108,7 @@ else
     constants+=" -D COMPILE_CURL=0"
 fi
 
+# OpenSSL
 echo -n "$list_item"
 echo -n "SSL:    "
 if [ -v ssl ]; then
@@ -120,82 +123,82 @@ fi
 echo $separator
 echo "Compiling:"
 
-mkdir -p ../bin
+mkdir -p bin
 mkdir -p objects
 
 echo -n "$list_item"
-echo -n "cracking.cpp"
+echo -n "hook.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c cracking.cpp -o objects/cracking.opp
+$cc $debug $options $constants -c ../src/hook.cpp -o objects/hook.opp
 
 echo -n "$list_item"
-echo -n "libcod.cpp"
+echo -n "iw1x.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c libcod.cpp -o objects/libcod.opp
+$cc $debug $options $constants -c ../src/iw1x.cpp -o objects/iw1x.opp
 
 echo -n "$list_item"
 echo -n "qvsnprintf.c"
 echo $wait_indicator
-$cc $debug $options $constants -c vendor/qvsnprintf.c -o objects/qvsnprintf.opp
+$cc $debug $options $constants -c ../deps/qvsnprintf.c -o objects/qvsnprintf.opp
 
 echo -n "$list_item"
 echo -n "gsc.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc.cpp -o objects/gsc.opp
+$cc $debug $options $constants -c ../src/gsc.cpp -o objects/gsc.opp
 
 echo -n "$list_item"
 echo -n "gsc_entity.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_entity.cpp -o objects/gsc_entity.opp
+$cc $debug $options $constants -c ../src/gsc_entity.cpp -o objects/gsc_entity.opp
 
 echo -n "$list_item"
 echo -n "gsc_player.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_player.cpp -o objects/gsc_player.opp
+$cc $debug $options $constants -c ../src/gsc_player.cpp -o objects/gsc_player.opp
 
 echo -n "$list_item"
 echo -n "gsc_bots.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_bots.cpp -o objects/gsc_bots.opp
+$cc $debug $options $constants -c ../src/gsc_bots.cpp -o objects/gsc_bots.opp
 
 echo -n "$list_item"
 echo -n "gsc_weapons.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_weapons.cpp -o objects/gsc_weapons.opp
+$cc $debug $options $constants -c ../src/gsc_weapons.cpp -o objects/gsc_weapons.opp
 
 echo -n "$list_item"
 echo -n "gsc_exec.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_exec.cpp -o objects/gsc_exec.opp
+$cc $debug $options $constants -c ../src/gsc_exec.cpp -o objects/gsc_exec.opp
 
 echo -n "$list_item"
 echo -n "gsc_utils.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c gsc_utils.cpp -o objects/gsc_utils.opp
+$cc $debug $options $constants -c ../src/gsc_utils.cpp -o objects/gsc_utils.opp
 
 echo -n "$list_item"
 echo -n "jump.cpp"
 echo $wait_indicator
-$cc $debug $options $constants -c jump.cpp -o objects/jump.opp
+$cc $debug $options $constants -c ../src/jump.cpp -o objects/jump.opp
 
 if [ $sqlite_found == 1 ]; then
     echo -n "$list_item"
     echo -n "gsc_sqlite.cpp"
     echo $wait_indicator
-    $cc $debug $options $constants -c gsc_sqlite.cpp -o objects/gsc_sqlite.opp
+    $cc $debug $options $constants -c ../src/gsc_sqlite.cpp -o objects/gsc_sqlite.opp
 fi
 
 if [ $curl_found == 1 ]; then
     echo -n "$list_item"
     echo -n "gsc_curl.cpp"
     echo $wait_indicator
-    $cc $debug $options $constants -c gsc_curl.cpp -o objects/gsc_curl.opp
+    $cc $debug $options $constants -c ../src/gsc_curl.cpp -o objects/gsc_curl.opp
 fi
 
-echo -n "Linking libcod1.so"
+echo -n "Linking iw1x.so"
 echo $wait_indicator
 objects="$(ls objects/*.opp)"
-$cc -m32 -shared -L/lib32 -o ../bin/libcod1.so -ldl $objects -lpthread $sqlite_link $curl_link $ssl_link
+$cc -m32 -shared -L/lib32 -o bin/iw1x.so -ldl $objects -lpthread $sqlite_link $curl_link $ssl_link
 
 echo $separator
 

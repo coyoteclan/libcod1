@@ -1,5 +1,5 @@
-#include "libcod.hpp"
-#include "cracking.hpp"
+#include "iw1x.hpp"
+#include "hook.hpp"
 
 //// Cvars
 cvar_t *com_cl_running;
@@ -346,7 +346,7 @@ void custom_Com_Init(char *commandLine)
     sv_showCommands = Cvar_FindVar("sv_showCommands");
 
     // Register
-    Cvar_Get("libcod", "1", CVAR_SERVERINFO);
+    Cvar_Get("iw1x", "1", CVAR_SERVERINFO);
     Cvar_Get("sv_wwwBaseURL", "", CVAR_ARCHIVE | CVAR_SYSTEMINFO);
     Cvar_Get("sv_wwwDownload", "0", CVAR_ARCHIVE | CVAR_SYSTEMINFO);
     // Register and create references
@@ -3331,12 +3331,12 @@ void *custom_Sys_LoadDll(const char *name, char *fqpath, int (**entryPoint)(int,
     return libHandle;
 }
 
-class libcod
+class iw1x
 {
     public:
-    libcod()
+    iw1x()
     {
-        printf("------------ libcod ------------\n");
+        printf("------------ iw1x ------------\n");
         printf("Compiled on %s %s using g++ %s\n", __DATE__, __TIME__, __VERSION__);
 
         // Don't inherit lib of parent
@@ -3400,19 +3400,19 @@ class libcod
         printf("--------------------------------\n");
     }
 
-    ~libcod()
+    ~iw1x()
     {
-        printf("Libcod unloaded\n");
+        printf("iw1x unloaded\n");
         system("stty sane");
     }
 };
 
-libcod *lc;
+iw1x *_iw1x;
 void __attribute__ ((constructor)) lib_load(void)
 {
-    lc = new libcod;
+    _iw1x = new iw1x;
 }
 void __attribute__ ((destructor)) lib_unload(void)
 {
-    delete lc;
+    delete _iw1x;
 }

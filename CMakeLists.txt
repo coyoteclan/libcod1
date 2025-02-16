@@ -34,7 +34,7 @@ else()
 endif()
 
 if(COMPILE_SQLITE)
-    find_library(SQLITE_LIB sqlite3 HINTS /usr/lib32 /usr/lib/i386-linux-gnu)
+    find_library(SQLITE_LIB sqlite3 HINTS /usr/lib32 /usr/lib/i386-linux-gnu /usr/lib)
     if(SQLITE_LIB)
         add_definitions(-DCOMPILE_SQLITE=1)
         set(SQLITE_FOUND TRUE)

@@ -1143,10 +1143,11 @@ void custom_SVC_Status(netadr_t from)
             int clientDeath = 0;
             if (gvm)
             {
-                clientScore = VM_Call(gvm, 0x14, cl - svs.clients); // Get client score
-                clientDeath = cl->gentity->client->sess.deaths;
+                clientScore = VM_Call(gvm, GAME_CLIENT_SCORE_GET, cl - svs.clients);
+                if(cl->gentity)
+                    clientDeath = cl->gentity->client->sess.deaths;
             }
-
+            
             if(sv_statusShowDeath->integer)
                 Com_sprintf(player, sizeof(player), "%s %i \"%s\"\n", va("k:%i;d:%i", clientScore, clientDeath), cl->ping, cl->name);
             else

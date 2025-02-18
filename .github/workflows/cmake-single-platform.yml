@@ -36,3 +36,8 @@ jobs:
         run: |
           cd build
           make
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: iw1x library
+          path: bin/iw1x.so

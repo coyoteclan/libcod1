@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Update
-      run: dpkg --add-architecture i386 && apt update && apt upgrade -y
+      run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt upgrade -y
     - name: Install
-      run: apt install g++-multilib cmake libstdc++6:i386
+      run: sudo apt install g++-multilib cmake libstdc++6:i386
   build:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
